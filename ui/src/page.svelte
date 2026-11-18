@@ -129,7 +129,7 @@
               <div class="flex items-center gap-2">
                 <Input
                   value={folder}
-                  placeholder="/home/you/autostorager"
+                  placeholder={t('autostorager.page.folderPlaceholder')}
                   class="w-full"
                   oninput={(event: Event) => {
                     const target =

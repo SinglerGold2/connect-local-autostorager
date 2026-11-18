@@ -25,7 +25,7 @@
     };
 
     void load();
-    const timer = setInterval(load, 10000);
+    const timer = setInterval(() => void load(), 10000);
     host.signal.addEventListener('abort', () => clearInterval(timer));
   });
 

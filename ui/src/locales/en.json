@@ -67,5 +67,9 @@
   "autostorager.manual.picture2": "2. Save into the shared folder.",
   "autostorager.manual.picture3": "3. Enter that folder on this page, as the server sees it.",
   "autostorager.manual.picture4": "4. The file appears under Storage.",
-  "autostorager.manual.picture5": "5. With its slicer details and preview."
+  "autostorager.manual.picture5": "5. With its slicer details and preview.",
+  "autostorager.page.langEn": "EN",
+  "autostorager.page.langDe": "DE",
+  "autostorager.page.folderPlaceholder": "/home/you/autostorager",
+  "autostorager.manual.linuxSample": "services:\n  prusa-connect:\n    volumes:\n      - /srv/autostorager:/incoming"
 }
