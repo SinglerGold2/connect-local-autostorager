@@ -41,18 +41,17 @@ unit name, the folder and the account from your own installation. `module add`
 writes beside the configuration the server reads, so the unit's `WorkingDirectory`
 is the folder to run it in.
 
-### Linux, desktop
+### Linux, server as a process
 
-Start the desktop app, quit it, and run the command from the folder the app was
-unpacked into. Its data lives in that folder, in `config/`.
+Prusa Connect Local has no desktop application on any system; it is a server you
+start. Run the command from the folder that holds `config/`, and restart the
+server afterwards.
 
 ```bash
+cd ~/prusa-connect
 ./prusa_connect_local module add github.com/singlergold2/connect-local-autostorager@0.1.0 \
   -from ~/Downloads/autostorager-0.1.0.tar.gz -approve -database sqlite
 ```
-
-Start the app again. If the app keeps its data somewhere else, run the command
-there; the folder with `config/` in it is the one that matters.
 
 ### Windows
 
@@ -103,7 +102,7 @@ The setting is then `/incoming`, not `/srv/autostorager`. The module creates
 `/srv/autostorager/successful` and `/srv/autostorager/failed`. Up to four mounts
 may be added, one per supervised folder.
 
-### Linux, server as a service or desktop
+### Linux, server as a service or a process
 
 The server reads the folder directly; no mount is involved. Enter the absolute
 path, such as `/srv/autostorager`, and make sure the account the server runs as
