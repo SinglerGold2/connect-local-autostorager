@@ -1,6 +1,12 @@
 <script lang="ts">
   import { Card, CardContent, PageHeader } from '@prusa/connect-ui/primitives';
 
+  import step1 from './assets/1-export-from-slicer.webp';
+  import step2 from './assets/2-save-into-the-share.webp';
+  import step3 from './assets/3-enter-the-folder.webp';
+  import step4 from './assets/4-it-appears-in-storage.webp';
+  import step5 from './assets/5-with-its-slicer-details.webp';
+
   import { heldHost } from './host';
 
   const t = heldHost().t;
@@ -69,6 +75,62 @@
 
         <h3 class="mt-2 font-medium">{t('autostorager.manual.checkTitle')}</h3>
         <p>{t('autostorager.manual.check')}</p>
+
+        <h3 class="mt-2 font-medium">
+          {t('autostorager.manual.picturesTitle')}
+        </h3>
+        <div class="flex flex-col gap-4">
+          <figure>
+            <img
+              src={step1}
+              alt={t('autostorager.manual.picture1')}
+              class="rounded border-neutral-200 border"
+            />
+            <figcaption class="text-neutral-500 mt-1 text-xs">
+              {t('autostorager.manual.picture1')}
+            </figcaption>
+          </figure>
+          <figure>
+            <img
+              src={step2}
+              alt={t('autostorager.manual.picture2')}
+              class="rounded border-neutral-200 border"
+            />
+            <figcaption class="text-neutral-500 mt-1 text-xs">
+              {t('autostorager.manual.picture2')}
+            </figcaption>
+          </figure>
+          <figure>
+            <img
+              src={step3}
+              alt={t('autostorager.manual.picture3')}
+              class="rounded border-neutral-200 border"
+            />
+            <figcaption class="text-neutral-500 mt-1 text-xs">
+              {t('autostorager.manual.picture3')}
+            </figcaption>
+          </figure>
+          <figure>
+            <img
+              src={step4}
+              alt={t('autostorager.manual.picture4')}
+              class="rounded border-neutral-200 border"
+            />
+            <figcaption class="text-neutral-500 mt-1 text-xs">
+              {t('autostorager.manual.picture4')}
+            </figcaption>
+          </figure>
+          <figure>
+            <img
+              src={step5}
+              alt={t('autostorager.manual.picture5')}
+              class="rounded border-neutral-200 border"
+            />
+            <figcaption class="text-neutral-500 mt-1 text-xs">
+              {t('autostorager.manual.picture5')}
+            </figcaption>
+          </figure>
+        </div>
       </div>
     </CardContent>
   </Card>
