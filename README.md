@@ -262,12 +262,16 @@ tell the same story, including a failure with its reason.
 ## Development
 
 ```bash
-sh install.sh              # build the bundle and the binary, install into the demo
-TARGET=app sh install.sh   # install into the real app instead
+make core      # fetch the pinned Prusa Connect checkout into .core/
+make check     # Go vet and tests, the client is current, the UI's lint and build
+make release   # the directory the marketplace takes, in release/
 ```
 
-The build needs the component library of a Prusa Connect checkout; `install.sh`
-builds it if `packages/svelte/dist` is missing.
+Both halves build against a checkout of Prusa Connect pinned in `CORE_REF`, never
+against a working copy on this machine. A newer Prusa Connect does not change
+this module by itself: raise `CORE_REF` in the `Makefile` on purpose, remove
+`.core`, and run the checks again. Only then does the module see the new core,
+and `require` in `module.yaml` should be raised with it.
 
 ## Licence
 

@@ -19,4 +19,4 @@ require (
 
 // The sdk is built from the checkout this module was written beside, so a
 // change there is seen here without a release.
-replace github.com/prusa3d/prusa-connect/sdk => /home/ulli/harness/prusa-connect/sdk
+replace github.com/prusa3d/prusa-connect/sdk => ./.core/sdk
