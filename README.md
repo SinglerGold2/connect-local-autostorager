@@ -113,41 +113,46 @@ sudo mkdir -p /srv/autostorager
 sudo chown prusa-connect:prusa-connect /srv/autostorager
 ```
 
-### Recommended: a share the PC writes into
+### The easy way: a folder on the server, mounted on your PC
 
-When the server runs on another machine, the cleanest way is a network share.
-PrusaSlicer exports straight into it, the file lands on the server, and the
-module picks it up there. No copying, no second step.
+1. **On the server**, create a folder and share it:
 
+```bash
+sudo mkdir -p /srv/autostorager
+sudo chown prusa-connect:prusa-connect /srv/autostorager   # or your server's user
 ```
-1  The client mounts the server's share
-     Linux     //192.168.178.3/hdd-sda on /mnt/y type cifs ...
-     Windows   net use Y: \\192.168.178.3\hdd-sda
-     macOS     Finder, Go, smb://192.168.178.3/hdd-sda
-2  A folder inside it is the supervised one, here /mnt/hdd-sda/autostorager
-   on the server, /mnt/y/autostorager on the client
-3  The container has to see that folder. Put it inside a mount the container
-   already has, with a bind mount on the host:
+
+```ini
+# /etc/samba/smb.conf
+[autostorager]
+   path = /srv/autostorager
+   browseable = yes
+   read only = no
+   valid users = your-user
 ```
 
 ```bash
-sudo mkdir -p /home/ulli/connect-local/config/pc-in
-echo "/mnt/hdd-sda/autostorager /home/ulli/connect-local/config/pc-in none bind,nofail,x-systemd.requires-mounts-for=/mnt/hdd-sda 0 0" | sudo tee -a /etc/fstab
-sudo mount /home/ulli/connect-local/config/pc-in
+sudo systemctl restart smbd
+sudo smbpasswd -a your-user
 ```
 
+2. **On your computer**, mount that share once; it then appears as a normal
+   drive or folder:
+
 ```
-4  On the settings page enter the path inside the container:
-   /app/config/pc-in
+Windows   net use Y: \\192.168.178.3\autostorager
+Linux     //192.168.178.3/autostorager /mnt/y cifs username=your-user,uid=1000 0 0
+macOS     Finder, Gehe zu, smb://192.168.178.3/autostorager
 ```
 
-Why inside `config/`: that folder is already mounted into the container, so no
-edit of the compose file is needed. CasaOS rewrites the compose file when it
-restarts the app, so a volume added there disappears; a bind mount in `fstab`
-survives.
+3. **In Auto-Storager**, enter the server path of that folder, `/srv/autostorager`.
+   If the server runs in a container, enter the path the container sees, not the
+   host path. That is the one thing that catches people out: a container only
+   sees what is mounted into it.
 
-PrusaSlicer then exports to `Y:\autostorager` or `/mnt/y/autostorager`, and the
-file appears under `successful/` on both sides once it is imported.
+4. **Save your prints there.** PrusaSlicer exports to `Y:\` or `/mnt/y`, the file
+   lands on the server, and the module imports it from the folder. It appears
+   under `successful/` in the same share once it is done.
 
 ### Windows
 

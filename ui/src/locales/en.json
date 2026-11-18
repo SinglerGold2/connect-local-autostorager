@@ -56,6 +56,6 @@
   "autostorager.page.folders": "Supervised folders",
   "autostorager.page.addFolder": "+ New supervised directory",
   "autostorager.page.remove": "Remove",
-  "autostorager.manual.smbTitle": "The recommended shape: a share the PC writes into",
-  "autostorager.manual.smb": "When the server runs on another machine, let the client write into a network share of the server and supervise a folder inside it. PrusaSlicer exports straight to the drive, the file lands on the server, and the module imports it there. The container must see that folder, so bind it inside the config mount the container already has, for example /mnt/hdd-sda/autostorager to /home/ulli/connect-local/config/pc-in, and enter /app/config/pc-in here. A volume added to the compose file does not survive a restart by CasaOS; an fstab bind mount does. The README carries the exact commands."
+  "autostorager.manual.smbTitle": "The easy way: a folder on the server, mounted on your computer",
+  "autostorager.manual.smb": "Create a folder on the server and share it. Mount that share on your computer, where it appears as a normal drive or folder: Y: on Windows, /mnt/y on Linux, smb://server/share on macOS. Enter the server path of that folder here, then save your prints into it from the slicer. The module imports them from there and moves them into successful/ inside the same share. If the server runs in a container, enter the path inside the container, not the host path."
 }
