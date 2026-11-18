@@ -51,5 +51,6 @@
   "autostorager.manual.precedenceTitle": "Which value counts",
   "autostorager.manual.precedence": "The settings page and the module's own dashboard page can both carry these values. What is saved on the settings page wins, because it is stored in the module's database and survives a restart.",
   "autostorager.manual.checkTitle": "Checking it works",
-  "autostorager.manual.check": "Drop a small .gcode into the folder. Within about one interval it should disappear from there, appear as successful/ inside the folder, and show up under Storage in the server with its preview. The Recent imports list on the settings page tells the same story."
+  "autostorager.manual.check": "Drop a small .gcode into the folder. Within about one interval it should disappear from there, appear as successful/ inside the folder, and show up under Storage in the server with its preview. The Recent imports list on the settings page tells the same story.",
+  "autostorager.card.empty": "Nothing imported yet."
 }

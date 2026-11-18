@@ -6,6 +6,7 @@
 import { defineModule } from '@prusa/connect-ui/slots';
 
 import { holdHost } from './host';
+import RecentCard from './cards/recent-card.svelte';
 import Manual from './manual.svelte';
 import Page from './page.svelte';
 import './styles.css';
@@ -30,4 +31,5 @@ export default defineModule((host) => {
   // them in step by hand after that.
   host.register.page('autostorager', Page);
   host.register.page('autostorager-manual', Manual);
+  host.register.card('recent', RecentCard);
 });
