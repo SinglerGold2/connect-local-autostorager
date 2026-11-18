@@ -1,5 +1,7 @@
 # Autostorager
 
+<img src="artwork/icon.svg" width="48" alt="Auto-Storager icon">
+
 A Prusa Connect module with both halves: a Go process serving one route,
 and a browser bundle drawing on it.
 `make new-module` wrote this skeleton.
