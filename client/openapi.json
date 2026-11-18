@@ -1,0 +1,97 @@
+{
+  "info": {
+    "title": "autostorager",
+    "version": "0.1.0",
+    "description": "The routes autostorager serves. Every path is relative to the mount the host assigns, and the host serves this document rebased under it at \u003cmount\u003e/openapi.json."
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/modules/com.github.aux.singlergold2.connect-local-autostorager/autostorager": {
+      "get": {
+        "operationId": "read-autostorager",
+        "summary": "What this module holds",
+        "description": "What the module holds, and the principal the host authorized, which is the host's answer and never a header the caller set. The host takes view_resource on the module's instance before this is called.",
+        "responses": {
+          "200": {
+            "description": "The module's answer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "settings": {
+                      "type": "object",
+                      "properties": {
+                        "folder": {
+                          "type": "string"
+                        },
+                        "interval_seconds": {
+                          "type": "integer"
+                        },
+                        "storage": {
+                          "type": "string"
+                        },
+                        "max_mb": {
+                          "type": "integer"
+                        },
+                        "move_on_success": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "folder",
+                        "interval_seconds",
+                        "storage",
+                        "max_mb",
+                        "move_on_success"
+                      ]
+                    },
+                    "recent": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "at": {
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "target": {
+                            "type": "string"
+                          },
+                          "result": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "at",
+                          "source",
+                          "result"
+                        ]
+                      }
+                    },
+                    "principal": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "settings",
+                    "recent"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

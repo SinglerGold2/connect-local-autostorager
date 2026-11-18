@@ -1,0 +1,20 @@
+{
+  "_meta.language": "English",
+  "_meta.note": "This module's own texts. The host reads this file from locales/en.json beside the bundle's entry and merges it under the module's namespace. Copy it to <tag>.json to translate; a key you leave out falls back to the line here.",
+  "autostorager.page.title": "Auto-Storager",
+  "autostorager.page.body": "Edit ui/src/page.svelte to change this page.",
+  "autostorager.page.what": "This module watches a folder and hands every print file it finds to the storage, where it appears like a manual upload with its preview and slicer details. Nothing is moved or deleted before the copy is complete.",
+  "autostorager.page.delay": "A file that just appeared is picked up within about one interval, and a large file adds the time it needs to be copied.",
+  "autostorager.page.names": "If a file of that name already exists in the storage, this module adds -1, -2 and so on until the name is free. Nothing is overwritten.",
+  "autostorager.page.docker": "On Linux with the server in a container, create the folder on the host first, mount it into the container, and enter the container path here. The README explains the mount.",
+  "autostorager.page.folder": "Folder",
+  "autostorager.page.interval": "Check interval",
+  "autostorager.page.storage": "Storage",
+  "autostorager.page.maxMb": "Largest file",
+  "autostorager.page.moveOnSuccess": "After a successful import",
+  "autostorager.page.recent": "Recent imports",
+  "autostorager.page.nothingYet": "Nothing imported yet.",
+  "autostorager.page.none": "not set",
+  "autostorager.page.yes": "move the source into successful/",
+  "autostorager.page.no": "leave the source where it is"
+}

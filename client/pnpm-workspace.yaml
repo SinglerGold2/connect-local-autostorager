@@ -1,0 +1,11 @@
+packages:
+  - .
+
+savePrefix: ''
+verifyDepsBeforeRun: error
+enableGlobalVirtualStore: false
+
+overrides:
+  '@prusa/connect': 'link:../.core/packages/typescript'
+
+autoInstallPeers: false
