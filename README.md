@@ -23,14 +23,36 @@ The `-database sqlite` is required: the settings a person edits on the page live
 in a database of the module's own. The module asks for `read_storage` and
 `write_storage`, because it looks up free names and writes the files.
 
-### Linux, server as a process
+### Linux, server as a service
+
+The server runs from a systemd unit and keeps its data beside its configuration.
+Run the command as the user that owns that data, then restart the unit.
+
+```bash
+sudo systemctl stop prusa-connect
+sudo -u prusa-connect /opt/prusa-connect/prusa_connect_local module add \
+  github.com/singlergold2/connect-local-autostorager@0.1.0 \
+  -from /tmp/autostorager-0.1.0.tar.gz -approve -database sqlite
+sudo systemctl start prusa-connect
+```
+
+`prusa-connect`, `/opt/prusa-connect` and the user are placeholders: take the
+unit name, the folder and the account from your own installation. `module add`
+writes beside the configuration the server reads, so the unit's `WorkingDirectory`
+is the folder to run it in.
+
+### Linux, desktop
+
+Start the desktop app, quit it, and run the command from the folder the app was
+unpacked into. Its data lives in that folder, in `config/`.
 
 ```bash
 ./prusa_connect_local module add github.com/singlergold2/connect-local-autostorager@0.1.0 \
-  -from autostorager-0.1.0.tar.gz -approve -database sqlite
+  -from ~/Downloads/autostorager-0.1.0.tar.gz -approve -database sqlite
 ```
 
-Then restart the server.
+Start the app again. If the app keeps its data somewhere else, run the command
+there; the folder with `config/` in it is the one that matters.
 
 ### Windows
 
@@ -80,6 +102,17 @@ The setting is then `/incoming`, not `/srv/autostorager`. The module creates
 `successful/` and `failed/` inside it; on the host they appear as
 `/srv/autostorager/successful` and `/srv/autostorager/failed`. Up to four mounts
 may be added, one per supervised folder.
+
+### Linux, server as a service or desktop
+
+The server reads the folder directly; no mount is involved. Enter the absolute
+path, such as `/srv/autostorager`, and make sure the account the server runs as
+may read and write it:
+
+```bash
+sudo mkdir -p /srv/autostorager
+sudo chown prusa-connect:prusa-connect /srv/autostorager
+```
 
 ### Windows
 
