@@ -206,3 +206,42 @@ host sees them under `/srv/autostorager/successful` and `/srv/autostorager/faile
 
 On Windows and macOS the server is a normal process and the folder is read
 directly, so no mount is involved.
+
+## What the module does with a file
+
+1. The folder is read every few seconds. Only `.gcode` and `.bgcode` files are taken.
+2. A file is read once its size has held still across two checks, so a file a
+   slicer is still writing is left alone.
+3. The module asks the storage for a free name and appends `-1`, `-2` and so on
+   if the name is taken. Nothing is ever overwritten.
+4. The bytes are copied into the storage through the same API an upload uses.
+   Only after that copy is committed is the source moved into `successful/`.
+5. A file that cannot be imported is moved into `failed/`, and a text file
+   beside it names the step, the reason, the time and the path.
+
+## Settings
+
+| Setting | Meaning |
+| --- | --- |
+| Folder | The directory to watch, an absolute path. Empty switches watching off. |
+| Check interval | Seconds between two looks. 60 s = 1 min. A short interval means constant requests, which costs I/O on a network share. |
+| Storage | The storage instance files are imported into, `local` on most servers. |
+| Largest file | In megabytes, 250 by default. A larger file goes to `failed/` with the reason. |
+| Move on success | Move the source into `successful/` after the commit. |
+
+The settings page stores these in the module's own database, which wins over the
+same values on the module's dashboard page, so what is saved here survives a
+restart.
+
+## Windows and macOS
+
+The server is a normal process there and the folder is read directly. Enter the
+full path, such as `C:\Autostorager` or `/Users/you/Autostorager`. No mount is
+involved.
+
+## Checking it works
+
+Drop a small `.gcode` into the folder. Within about one interval it should leave
+the folder, appear under `successful/`, and show up under **Storage** with its
+preview. The **Recent imports** list on the settings page tells the same story,
+including a failure with its reason.
