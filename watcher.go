@@ -1,8 +1,8 @@
 package main
 
-// The watcher: read a folder the operator named, and hand every print file it
-// holds to the storage. Nothing is moved or deleted before the storage has the
-// bytes.
+// The watchers: one loop per supervised folder. Every file is handed to the
+// storage, and the source moves into the folder's own successful/ or failed/
+// only after the storage has the bytes.
 
 import (
 	"context"
@@ -18,51 +18,48 @@ import (
 	"github.com/prusa3d/prusa-connect/sdk/storageapi"
 )
 
+// recentLimit bounds the list the page and the card read.
+const recentLimit = 20
+
+// sizeSettle is how many scans a file's size must hold before it is read.
+const sizeSettle = 2
+
 // errNoFile is what the storage answers for a name it does not hold.
 var errNoFile = storageapi.ErrNoFile
 
-// recentLimit bounds the list the page reads.
-const recentLimit = 20
-
-// sizeSettle is how many scans a file's size must hold before it is read. A
-// file a slicer is still writing grows between two scans.
-const sizeSettle = 2
-
-// Import is one line of the page's list.
+// Import is one line of the page's list and of the card.
 type Import struct {
 	At     string `json:"at"`
+	Folder string `json:"folder"`
 	Source string `json:"source"`
 	Target string `json:"target"`
 	Result string `json:"result"`
 	Detail string `json:"detail,omitempty"`
 }
 
-// watchState is what the module knows about its work right now.
-type watchState struct {
+// shared is what every watcher and the page read together.
+type shared struct {
 	mu      sync.Mutex
-	folder  string
 	recent  []Import
 	scans   int64
 	imports int64
 	failed  int64
 	lastAt  string
-	sizes   map[string]int64
-	stable  map[string]int
 }
 
 var (
 	// store is the storage client of this session, set once the session exists.
 	store *storageapi.Client
 
-	// watching is the cancel of the running loop, so a new configuration
-	// replaces it instead of stacking a second one.
-	watching context.CancelFunc
+	// watching cancels every loop, so a new configuration replaces the old set
+	// instead of stacking another one.
+	watching []context.CancelFunc
 
-	// state is the one piece of mutable state the module keeps.
-	state = &watchState{sizes: map[string]int64{}, stable: map[string]int{}}
+	// view is the one piece of state the module keeps for its page.
+	view = &shared{}
 
-	// watcherMu guards the loop's lifetime against two configurations arriving
-	// at once.
+	// watcherMu guards the set of loops against two configurations arriving at
+	// once.
 	watcherMu sync.Mutex
 )
 
@@ -73,38 +70,37 @@ func allowed(name string) bool {
 	return strings.HasSuffix(lower, ".gcode") || strings.HasSuffix(lower, ".bgcode")
 }
 
-// startWatcher stops the running loop and starts one for these settings. An
-// empty folder stops watching, which is how an operator switches it off.
+// startWatcher stops every running loop and starts one per folder.
 func startWatcher(s Settings) {
 	watcherMu.Lock()
 	defer watcherMu.Unlock()
 
-	if watching != nil {
-		watching()
-		watching = nil
+	for _, cancel := range watching {
+		cancel()
 	}
 
-	state.mu.Lock()
-	state.folder = s.Folder
-	state.sizes = map[string]int64{}
-	state.stable = map[string]int{}
-	state.mu.Unlock()
+	watching = nil
 
-	if s.Folder == "" {
-		return
+	for _, folder := range s.Folders {
+		if strings.TrimSpace(folder) == "" {
+			continue
+		}
+
+		ctx, cancel := context.WithCancel(context.Background())
+		watching = append(watching, cancel)
+
+		go loop(ctx, s, folder)
 	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-	watching = cancel
-
-	go loop(ctx, s)
 }
 
-// loop reads the folder until it is replaced or the module stops.
-func loop(ctx context.Context, s Settings) {
+// loop reads one folder until it is replaced or the module stops.
+func loop(ctx context.Context, s Settings, folder string) {
 	interval := time.Duration(s.IntervalSeconds) * time.Second
 	timer := time.NewTimer(0)
 	defer timer.Stop()
+
+	sizes := map[string]int64{}
+	stable := map[string]int{}
 
 	for {
 		select {
@@ -113,23 +109,26 @@ func loop(ctx context.Context, s Settings) {
 		case <-timer.C:
 		}
 
-		scan(ctx, s)
+		scan(ctx, s, folder, sizes, stable)
 		timer.Reset(interval)
 	}
 }
 
-// scan reads the folder once and imports what is ready.
-func scan(ctx context.Context, s Settings) {
-	entries, err := os.ReadDir(s.Folder)
+// scan reads one folder once and imports what is ready.
+func scan(ctx context.Context, s Settings, folder string, sizes map[string]int64, stable map[string]int) {
+	entries, err := os.ReadDir(folder)
 	if err != nil {
-		note(Import{At: now(), Source: s.Folder, Result: "error", Detail: err.Error()})
+		note(Import{At: now(), Folder: folder, Source: folder, Result: "error", Detail: err.Error()})
 
 		return
 	}
 
-	state.mu.Lock()
-	state.scans++
-	state.lastAt = now()
+	view.mu.Lock()
+	view.scans++
+	view.lastAt = now()
+	view.mu.Unlock()
+
+	ready := make([]string, 0, len(entries))
 
 	for _, entry := range entries {
 		if entry.IsDir() || !allowed(entry.Name()) {
@@ -142,62 +141,54 @@ func scan(ctx context.Context, s Settings) {
 		}
 
 		name := entry.Name()
-		if state.sizes[name] == info.Size() {
-			state.stable[name]++
+		if sizes[name] == info.Size() {
+			stable[name]++
 		} else {
-			state.sizes[name] = info.Size()
-			state.stable[name] = 1
+			sizes[name] = info.Size()
+			stable[name] = 1
 		}
-	}
-	state.mu.Unlock()
 
-	state.mu.Lock()
-	ready := make([]string, 0, len(state.stable))
-
-	for name, count := range state.stable {
-		if count >= sizeSettle {
+		if stable[name] >= sizeSettle {
 			ready = append(ready, name)
 		}
 	}
-	state.mu.Unlock()
 
 	for _, name := range ready {
-		importOne(ctx, s, filepath.Join(s.Folder, name))
+		importOne(ctx, s, folder, filepath.Join(folder, name))
 
-		state.mu.Lock()
-		delete(state.sizes, name)
-		delete(state.stable, name)
-		state.mu.Unlock()
+		delete(sizes, name)
+		delete(stable, name)
 	}
 }
 
 // importOne copies one file into the storage and moves the source afterwards.
-func importOne(ctx context.Context, s Settings, path string) {
+func importOne(ctx context.Context, s Settings, folder, path string) {
 	name := filepath.Base(path)
 
 	info, err := os.Stat(path)
 	if err != nil {
-		fail(s, path, name, "reading the file", err)
+		fail(s, folder, path, name, "reading the file", err)
 
 		return
 	}
 
 	if info.Size() > int64(s.MaxMB)<<20 {
-		fail(s, path, name, "the file is larger than the limit", fmt.Errorf("%d MB is more than %d MB", info.Size()>>20, s.MaxMB))
+		fail(s, folder, path, name, "the file is larger than the limit",
+			fmt.Errorf("%d MB is more than %d MB", info.Size()>>20, s.MaxMB))
 
 		return
 	}
 
-	target, err := freeName(ctx, s.Storage, name, info.Size())
+	target, err := freeName(ctx, s.Storage, name)
 	if err != nil {
-		fail(s, path, name, "looking for a free name", err)
+		fail(s, folder, path, name, "looking for a free name", err)
 
 		return
 	}
 
 	body, err := os.Open(path)
 	if err != nil {
-		fail(s, path, name, "opening the file", err)
+		fail(s, folder, path, name, "opening the file", err)
 
 		return
 	}
@@ -206,27 +197,26 @@ func importOne(ctx context.Context, s Settings, path string) {
 	_ = body.Close()
 
 	if err != nil {
-		fail(s, path, name, "writing into the storage", err)
+		fail(s, folder, path, name, "writing into the storage", err)
 
 		return
 	}
 
-	state.mu.Lock()
-	state.imports++
-	state.recent = append(state.recent, Import{At: now(), Source: path, Target: written.Path, Result: "imported"})
-	state.recent = trim(state.recent)
-	state.mu.Unlock()
+	view.mu.Lock()
+	view.imports++
+	view.recent = append(view.recent, Import{At: now(), Folder: folder, Source: path, Target: written.Path, Result: "imported"})
+	view.recent = trim(view.recent)
+	view.mu.Unlock()
 
 	if s.MoveOnSuccess {
-		if moveErr := moveTo(path, filepath.Join(s.Folder, "successful", name)); moveErr != nil {
-			note(Import{At: now(), Source: path, Target: written.Path, Result: "imported", Detail: "could not move the source: " + moveErr.Error()})
+		if moveErr := moveTo(path, filepath.Join(folder, "successful", name)); moveErr != nil {
+			note(Import{At: now(), Folder: folder, Source: path, Target: written.Path, Result: "imported", Detail: "could not move the source: " + moveErr.Error()})
 		}
 	}
 }
 
-// freeName finds a name the storage does not hold yet. A dollar sign is not
-// part of it: the suffix is -1, -2 and so on.
-func freeName(ctx context.Context, storage, name string, size int64) (string, error) {
+// freeName finds a name the storage does not hold yet.
+func freeName(ctx context.Context, storage, name string) (string, error) {
 	ext := filepath.Ext(name)
 	base := strings.TrimSuffix(name, ext)
 
@@ -251,17 +241,17 @@ func freeName(ctx context.Context, storage, name string, size int64) (string, er
 
 // fail moves a source it could not import into failed/ and writes what went
 // wrong beside it.
-func fail(s Settings, path, name, step string, cause error) {
-	state.mu.Lock()
-	state.failed++
-	state.mu.Unlock()
+func fail(s Settings, folder, path, name, step string, cause error) {
+	view.mu.Lock()
+	view.failed++
+	view.mu.Unlock()
 
 	reason := fmt.Sprintf("Step: %s\nReason: %v\nTime: %s\nSource: %s\n", step, cause, now(), path)
-	note(Import{At: now(), Source: path, Result: "failed", Detail: step + ": " + cause.Error()})
+	note(Import{At: now(), Folder: folder, Source: path, Result: "failed", Detail: step + ": " + cause.Error()})
 
-	destination := filepath.Join(s.Folder, "failed", name)
+	destination := filepath.Join(folder, "failed", name)
 	if moveErr := moveTo(path, destination); moveErr != nil {
-		note(Import{At: now(), Source: path, Result: "failed", Detail: "could not move the source: " + moveErr.Error()})
+		note(Import{At: now(), Folder: folder, Source: path, Result: "failed", Detail: "could not move the source: " + moveErr.Error()})
 
 		return
 	}
@@ -307,11 +297,11 @@ func moveTo(from, to string) error {
 
 // note keeps one line for the page.
 func note(entry Import) {
-	state.mu.Lock()
-	defer state.mu.Unlock()
+	view.mu.Lock()
+	defer view.mu.Unlock()
 
-	state.recent = append(state.recent, entry)
-	state.recent = trim(state.recent)
+	view.recent = append(view.recent, entry)
+	view.recent = trim(view.recent)
 }
 
 // trim keeps the newest lines.
@@ -325,16 +315,16 @@ func trim(lines []Import) []Import {
 
 // recentImports is the list the page reads.
 func recentImports() []Import {
-	state.mu.Lock()
-	defer state.mu.Unlock()
+	view.mu.Lock()
+	defer view.mu.Unlock()
 
-	out := make([]Import, len(state.recent))
-	copy(out, state.recent)
+	out := make([]Import, len(view.recent))
+	copy(out, view.recent)
 
 	return out
 }
 
-// now is the timestamp the page shows, in the module's own words.
+// now is the timestamp the page shows.
 func now() string {
 	return time.Now().Format(time.RFC3339)
 }

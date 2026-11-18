@@ -85,8 +85,9 @@ type Settings struct {
 	// Message is the line GET /autostorager answers with.
 	Message string `json:"message"`
 
-	// Folder is the directory this module watches. Empty switches watching off.
-	Folder string `json:"folder"`
+	// Folders are the directories this module watches, at most four. Empty
+	// switches watching off.
+	Folders []string `json:"folders"`
 
 	// IntervalSeconds is how often the folder is read.
 	IntervalSeconds int `json:"interval_seconds"`
@@ -127,6 +128,8 @@ func withDefaults(sent Settings) Settings {
 	if sent.Message == "" {
 		sent.Message = defaultMessage
 	}
+
+	sent.Folders = normalized(sent.Folders)
 
 	if sent.IntervalSeconds <= 0 {
 		sent.IntervalSeconds = defaultInterval
@@ -269,11 +272,11 @@ func routes() http.Handler {
 		current := settings()
 
 		var sent struct {
-			Folder          *string `json:"folder"`
-			IntervalSeconds *int    `json:"interval_seconds"`
-			Storage         *string `json:"storage"`
-			MaxMB           *int    `json:"max_mb"`
-			MoveOnSuccess   *bool   `json:"move_on_success"`
+			Folders         *[]string `json:"folders"`
+			IntervalSeconds *int      `json:"interval_seconds"`
+			Storage         *string   `json:"storage"`
+			MaxMB           *int      `json:"max_mb"`
+			MoveOnSuccess   *bool     `json:"move_on_success"`
 		}
 
 		if err := json.NewDecoder(r.Body).Decode(&sent); err != nil {
@@ -281,8 +284,8 @@ func routes() http.Handler {
 			return
 		}
 
-		if sent.Folder != nil {
-			current.Folder = *sent.Folder
+		if sent.Folders != nil {
+			current.Folders = normalized(*sent.Folders)
 		}
 
 		if sent.IntervalSeconds != nil {

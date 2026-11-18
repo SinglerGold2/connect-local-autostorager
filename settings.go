@@ -7,14 +7,15 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
-// settingKeys are the keys this module stores, in the order the page shows
-// them. A key outside this list is refused rather than written blind.
-var settingKeys = []string{"folder", "interval_seconds", "storage", "max_mb", "move_on_success"}
+// maxFolders is how many directories one instance may supervise.
+const maxFolders = 4
 
 // merged reads the saved settings and lays them over what the host sent.
 func merged(ctx context.Context, base Settings) Settings {
@@ -44,8 +45,11 @@ func merged(ctx context.Context, base Settings) Settings {
 // apply writes one stored value onto a settings struct.
 func apply(s Settings, key, value string) Settings {
 	switch key {
-	case "folder":
-		s.Folder = value
+	case "folders":
+		var folders []string
+		if err := json.Unmarshal([]byte(value), &folders); err == nil {
+			s.Folders = folders
+		}
 	case "storage":
 		if value != "" {
 			s.Storage = value
@@ -71,17 +75,22 @@ func save(ctx context.Context, settings Settings) error {
 		return errors.New("this instance has no database")
 	}
 
-	tx, err := db.BeginTx(ctx, nil)
+	folders, err := json.Marshal(settings.Folders)
 	if err != nil {
 		return err
 	}
 
 	values := map[string]string{
-		"folder":           settings.Folder,
+		"folders":          string(folders),
 		"interval_seconds": strconv.Itoa(settings.IntervalSeconds),
 		"storage":          settings.Storage,
 		"max_mb":           strconv.Itoa(settings.MaxMB),
 		"move_on_success":  strconv.FormatBool(settings.MoveOnSuccess),
+	}
+
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
 	}
 
 	for key, value := range values {
@@ -103,6 +112,26 @@ func upsert(ctx context.Context, tx *sql.Tx, key, value string) error {
 	return err
 }
 
+// normalized drops empty folders and keeps the list within the limit.
+func normalized(folders []string) []string {
+	out := make([]string, 0, len(folders))
+
+	for _, folder := range folders {
+		trimmed := strings.TrimSpace(folder)
+		if trimmed == "" {
+			continue
+		}
+
+		out = append(out, trimmed)
+	}
+
+	if len(out) > maxFolders {
+		out = out[:maxFolders]
+	}
+
+	return out
+}
+
 // validate refuses a value that cannot work, before it is stored.
 func validate(s Settings) error {
 	if s.IntervalSeconds < 1 || s.IntervalSeconds > 86400 {
@@ -115,6 +144,10 @@ func validate(s Settings) error {
 
 	if s.Storage == "" {
 		return fmt.Errorf("a storage name is required")
+	}
+
+	if len(normalized(s.Folders)) > maxFolders {
+		return fmt.Errorf("at most %d folders can be supervised", maxFolders)
 	}
 
 	return nil

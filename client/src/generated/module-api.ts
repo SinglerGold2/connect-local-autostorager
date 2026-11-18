@@ -53,12 +53,12 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         Settings: {
-            folder: string;
             interval_seconds: number;
             storage: string;
             max_mb: number;
             move_on_success: boolean;
             message?: string;
+            folders: string[];
         };
     };
     responses: never;

@@ -211,7 +211,7 @@ directly, so no mount is involved.
 
 ## What the module does with a file
 
-1. The folder is read every few seconds. Only `.gcode` and `.bgcode` files are taken.
+1. Each supervised folder is read every few seconds. Only `.gcode` and `.bgcode` files are taken.
 2. A file is read once its size has held still across two checks, so a file a
    slicer is still writing is left alone.
 3. The module asks the storage for a free name and appends `-1`, `-2` and so on
@@ -225,7 +225,7 @@ directly, so no mount is involved.
 
 | Setting | Meaning |
 | --- | --- |
-| Folder | The directory to watch, an absolute path. Empty switches watching off. |
+| Supervised folders | Up to four absolute paths, added with **+ New supervised directory**. Each folder has its own `successful/` and `failed/`. No folder switches watching off. |
 | Check interval | Seconds between two looks. 60 s = 1 min. A short interval means constant requests, which costs I/O on a network share. |
 | Storage | The storage instance files are imported into, `local` on most servers. |
 | Largest file | In megabytes, 250 by default. A larger file goes to `failed/` with the reason. |

@@ -17,7 +17,7 @@
   "autostorager.page.none": "not set",
   "autostorager.page.yes": "move the source into successful/",
   "autostorager.page.no": "leave the source where it is",
-  "autostorager.page.folderHint": "The absolute path on the server. Under Linux in a container this is the path inside the container, so the host folder has to be mounted first.",
+  "autostorager.page.folderHint": "Up to four absolute paths. Each folder gets its own successful/ and failed/. Under Linux in a container these are the paths inside the container, so the host folders have to be mounted first.",
   "autostorager.page.intervalHint": "Seconds between two looks into the folder. 60 s = 1 min. A very short interval means constant requests, which costs I/O on a network share; five seconds is enough for most folders.",
   "autostorager.page.maxHint": "A larger file is moved into failed/ with a reason instead of being imported.",
   "autostorager.page.save": "Save",
@@ -35,11 +35,11 @@
   "autostorager.manual.flow5": "A file that cannot be imported is moved into failed/, and a text file beside it says at which step it stopped and why.",
   "autostorager.manual.linuxTitle": "The folder on Linux, with the server in a container",
   "autostorager.manual.linux": "A container sees only what is mounted into it. Create the folder on the host, add it as a volume to the server's compose file, and enter the path inside the container on the settings page, not the host path.",
-  "autostorager.manual.linuxPath": "In the example the host folder /srv/autostorager appears as /incoming in the container, so the setting is /incoming. The module creates successful/ and failed/ inside that folder; on the host they appear as /srv/autostorager/successful and /srv/autostorager/failed.",
+  "autostorager.manual.linuxPath": "In the example the host folder /srv/autostorager appears as /incoming in the container, so the setting is /incoming. Mount as many host folders as you want to supervise, up to four. The module creates successful/ and failed/ inside each supervised folder; on the host they appear as /srv/autostorager/successful and /srv/autostorager/failed.",
   "autostorager.manual.otherTitle": "Windows and macOS",
   "autostorager.manual.other": "There the server is a normal process and the folder is read directly. Enter the full path, such as C:\\Autostorager or /Users/you/Autostorager. No mount is involved.",
   "autostorager.manual.settingsTitle": "The settings, one by one",
-  "autostorager.manual.settingFolder": "Folder: the directory to watch, an absolute path. Empty switches watching off.",
+  "autostorager.manual.settingFolder": "Supervised folders: up to four absolute paths, added with [+] New supervised directory. Each folder is watched on its own and keeps its own successful/ and failed/. No folder means nothing is watched.",
   "autostorager.manual.settingInterval": "Check interval in seconds: how often the folder is read. 60 s is one minute. A very short interval means constant requests, which costs I/O on a network share; five seconds is enough for most folders, and a file is noticed within about one interval.",
   "autostorager.manual.settingStorage": "Storage: which storage instance the file is imported into. Most servers have one, called local.",
   "autostorager.manual.settingSize": "Largest file in megabytes, 250 by default. A larger file is not imported; it goes to failed/ with the reason.",
@@ -52,5 +52,8 @@
   "autostorager.manual.precedence": "The settings page and the module's own dashboard page can both carry these values. What is saved on the settings page wins, because it is stored in the module's database and survives a restart.",
   "autostorager.manual.checkTitle": "Checking it works",
   "autostorager.manual.check": "Drop a small .gcode into the folder. Within about one interval it should disappear from there, appear as successful/ inside the folder, and show up under Storage in the server with its preview. The Recent imports list on the settings page tells the same story.",
-  "autostorager.card.empty": "Nothing imported yet."
+  "autostorager.card.empty": "Nothing imported yet.",
+  "autostorager.page.folders": "Supervised folders",
+  "autostorager.page.addFolder": "+ New supervised directory",
+  "autostorager.page.remove": "Remove"
 }

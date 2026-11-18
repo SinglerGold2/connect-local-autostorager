@@ -4,9 +4,6 @@
       "Settings": {
         "type": "object",
         "properties": {
-          "folder": {
-            "type": "string"
-          },
           "interval_seconds": {
             "type": "integer"
           },
@@ -21,14 +18,20 @@
           },
           "message": {
             "type": "string"
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
-          "folder",
           "interval_seconds",
           "storage",
           "max_mb",
-          "move_on_success"
+          "move_on_success",
+          "folders"
         ]
       }
     }

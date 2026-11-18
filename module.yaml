@@ -58,10 +58,6 @@ options:
     type: string
     default: "Autostorager is serving."
     summary: The line the module's own route answers with.
-  - key: folder
-    type: string
-    default: ""
-    summary: The directory this module watches. Empty switches watching off.
   - key: interval_seconds
     type: int
     default: "5"

@@ -17,6 +17,8 @@
   type Settings =
     operations['read-settings']['responses'][200]['content']['application/json'];
 
+  const maxFolders = 4;
+
   const host = heldHost();
   const t = host.t;
   const routes = bind(host.client);
@@ -33,8 +35,13 @@
   async function load() {
     try {
       answer = await routes.readAutostorager({}, host.signal);
-      if (draft === undefined)
-        draft = await routes.readSettings({}, host.signal);
+      if (draft === undefined) {
+        const loaded = await routes.readSettings({}, host.signal);
+        draft = {
+          ...loaded,
+          folders: loaded.folders.length > 0 ? loaded.folders : [''],
+        };
+      }
     } catch {
       answer = undefined;
     }
@@ -47,7 +54,11 @@
     notice = '';
 
     try {
-      draft = await routes.saveSettings({ body: draft }, host.signal);
+      const sent = {
+        ...draft,
+        folders: draft.folders.filter((folder) => folder.trim() !== ''),
+      };
+      draft = await routes.saveSettings({ body: sent }, host.signal);
       notice = t('autostorager.page.saved');
       await load();
     } catch (error) {
@@ -57,8 +68,25 @@
     }
   }
 
-  function setFolder(value: string) {
-    if (draft !== undefined) draft.folder = value;
+  function setFolder(index: number, value: string) {
+    if (draft === undefined) return;
+
+    draft.folders = draft.folders.map((folder, at) =>
+      at === index ? value : folder,
+    );
+  }
+
+  function addFolder() {
+    if (draft === undefined || draft.folders.length >= maxFolders) return;
+
+    draft.folders = [...draft.folders, ''];
+  }
+
+  function removeFolder(index: number) {
+    if (draft === undefined) return;
+
+    const rest = draft.folders.filter((_, at) => at !== index);
+    draft.folders = rest.length > 0 ? rest : [''];
   }
 
   function setInterval(value: string) {
@@ -107,17 +135,47 @@
     <Card>
       <CardContent>
         <div class="flex flex-col gap-3">
-          <div class="flex flex-col gap-1">
-            <Label for="ast-folder">{t('autostorager.page.folder')}</Label>
-            <Input
-              value={draft.folder}
-              placeholder="/home/you/autostorager"
-              class="w-full"
-              oninput={(event: Event) => {
-                const target = event.currentTarget as HTMLInputElement | null;
-                if (target !== null) setFolder(target.value);
-              }}
-            />
+          <div class="flex flex-col gap-2">
+            <Label>{t('autostorager.page.folders')}</Label>
+
+            {#each draft.folders as folder, index (index)}
+              <div class="flex items-center gap-2">
+                <Input
+                  value={folder}
+                  placeholder="/home/you/autostorager"
+                  class="w-full"
+                  oninput={(event: Event) => {
+                    const target =
+                      event.currentTarget as HTMLInputElement | null;
+                    if (target !== null) setFolder(index, target.value);
+                  }}
+                />
+                {#if draft.folders.length > 1}
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    disabled={busy}
+                    onclick={() => removeFolder(index)}
+                  >
+                    {t('autostorager.page.remove')}
+                  </Button>
+                {/if}
+              </div>
+            {/each}
+
+            <div class="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={busy || draft.folders.length >= maxFolders}
+                onclick={addFolder}
+              >
+                {t('autostorager.page.addFolder')}
+              </Button>
+              <span class="text-neutral-500 text-xs"
+                >{draft.folders.length} / {maxFolders}</span
+              >
+            </div>
             <p class="text-neutral-500 text-xs">
               {t('autostorager.page.folderHint')}
             </p>
@@ -196,7 +254,7 @@
                 class="border-neutral-200 flex flex-wrap items-center gap-2 border-t pt-1"
               >
                 <span class="text-neutral-500">{entry.at}</span>
-                <span>{entry.source}</span>
+                <span class="truncate">{entry.source}</span>
                 <span class="ml-auto">{entry.result}</span>
                 {#if entry.detail}<span class="text-neutral-500"
                     >{entry.detail}</span
