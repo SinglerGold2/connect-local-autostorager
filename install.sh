@@ -29,7 +29,9 @@
 set -e
 
 HERE=$(cd "$(dirname "$0")" && pwd)
-CHECKOUT=/home/ulli/harness/prusa-connect
+# The checkout this module builds beside, pinned by the Makefile. Set CHECKOUT
+# to build against another one.
+CHECKOUT=${CHECKOUT:-$PWD/.core}
 
 NAME=autostorager
 MODULE=github.com/singlergold2/connect-local-autostorager
