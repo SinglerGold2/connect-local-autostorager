@@ -131,6 +131,46 @@ mkdir C:\Autostorager
 The path is the whole configuration: `~/Autostorager`, `/Users/you/Autostorager`
 or `C:\Autostorager`. Save prints there and the module imports them.
 
+### What to enter as the supervised folder
+
+The field takes the path **as the server sees it**, not as your computer sees it.
+Those differ exactly when the server runs in a container.
+
+```
+Server without a container   /srv/autostorager
+Server in a container         /app/config/pc-in, or whatever path inside the
+                              container the host folder is mounted at
+Your computer                 Y:\ or /mnt/y, never the value to enter here
+```
+
+`/app/config/pc-in` looks odd because it is a container path: on the host it is
+`/home/ulli/connect-local/config/pc-in`, which is mounted into the container as
+`/app/config`. If the folder you enter does not exist inside the container, the
+module says so under **Recent imports** on the next check, with the error the
+operating system returned.
+
+### How to, in pictures
+
+**1. Export from the slicer, into the network drive.**
+
+![PrusaSlicer export dialog with Local drive chosen](docs/howto/1-export-from-slicer.webp)
+
+**2. Save into the shared folder.**
+
+![The save dialog with the network folder open](docs/howto/2-save-into-the-share.webp)
+
+**3. Enter that folder on the module's page.**
+
+![The Auto-Storager page with /app/config/pc-in in the folder field](docs/howto/3-enter-the-folder.webp)
+
+**4. The file appears in Storage.**
+
+![The storage listing with the imported file](docs/howto/4-it-appears-in-storage.webp)
+
+**5. With its slicer details and preview.**
+
+![The file's detail page with print time and filament](docs/howto/5-with-its-slicer-details.webp)
+
 ### The easy way: a folder on the server, mounted on your PC
 
 1. **On the server**, create a folder and share it:

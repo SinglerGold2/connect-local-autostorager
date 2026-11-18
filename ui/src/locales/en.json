@@ -59,5 +59,7 @@
   "autostorager.manual.smbTitle": "The easy way: a folder on the server, mounted on your computer",
   "autostorager.manual.smb": "Create a folder on the server and share it. Mount that share on your computer, where it appears as a normal drive or folder: Y: on Windows, /mnt/y on Linux, smb://server/share on macOS. Enter the server path of that folder here, then save your prints into it from the slicer. The module imports them from there and moves them into successful/ inside the same share. If the server runs in a container, enter the path inside the container, not the host path.",
   "autostorager.manual.localTitle": "If the server runs on the same computer",
-  "autostorager.manual.local": "Then nothing is shared and nothing is mounted. Create a folder such as ~/Autostorager or C:\\Autostorager, enter its path here, and save your prints into it. That is the whole setup."
+  "autostorager.manual.local": "Then nothing is shared and nothing is mounted. Create a folder such as ~/Autostorager or C:\\Autostorager, enter its path here, and save your prints into it. That is the whole setup.",
+  "autostorager.manual.pathTitle": "What to enter as the supervised folder",
+  "autostorager.manual.path": "The field takes the path as the server sees it, not as your computer sees it. Without a container that is the folder itself, such as /srv/autostorager. In a container it is the path inside the container: /app/config/pc-in looks odd because on the host that same folder is /home/ulli/connect-local/config/pc-in, mounted into the container as /app/config. Your computer's drive letter or /mnt path is never the value to enter here. If the path does not exist inside the container, Recent imports says so on the next check."
 }
