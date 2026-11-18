@@ -143,11 +143,13 @@ Server in a container         /app/config/pc-in, or whatever path inside the
 Your computer                 Y:\ or /mnt/y, never the value to enter here
 ```
 
-`/app/config/pc-in` looks odd because it is a container path: on the host it is
-`/home/ulli/connect-local/config/pc-in`, which is mounted into the container as
-`/app/config`. If the folder you enter does not exist inside the container, the
-module says so under **Recent imports** on the next check, with the error the
-operating system returned.
+`/app/config/pc-in` looks odd because it is a container path. In this example
+the host folder is `pc-in` inside the server's config directory, and that
+directory is mounted into the container as `/app/config`. Your server's folders
+and mount points are your own; what matters is that the path you enter is the
+path the container sees. If it does not exist there, the module says so under
+**Recent imports** on the next check, with the error the operating system
+returned.
 
 ### How to, in pictures
 
