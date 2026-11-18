@@ -41,7 +41,7 @@ unit name, the folder and the account from your own installation. `module add`
 writes beside the configuration the server reads, so the unit's `WorkingDirectory`
 is the folder to run it in.
 
-### Linux, server as a process
+### Linux, server as a process (Linux desktop)
 
 Prusa Connect Local has no desktop application on any system; it is a server you
 start. Run the command from the folder that holds `config/`, and restart the
