@@ -29,6 +29,12 @@ summary: Watches up to four folders and hands every print file to the storage.
 codeowner: singlergold2
 # The module wire major the process half speaks.
 contract_major: 1
+# The core this build was tested against, and the storage calls it uses. A core
+# older than this is refused at install rather than failing on first use.
+require:
+  core: ">=0.1.0-beta.1"
+  core-storage.stat: "*"
+  core-storage.write: "*"
 # Where the fragment describing the routes is, inside this repository.
 openapi: openapi.json
 # The platforms the release ships a binary for, each a GOOS_GOARCH pair. Drop
