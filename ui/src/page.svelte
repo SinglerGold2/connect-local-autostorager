@@ -111,22 +111,9 @@
 
   <Card>
     <CardContent>
-      <div class="flex flex-col gap-2 text-sm">
-        <p>{t('autostorager.page.what')}</p>
-        <p class="text-neutral-600">{t('autostorager.page.delay')}</p>
-        <p class="text-neutral-600">{t('autostorager.page.names')}</p>
-        <p class="text-neutral-600">{t('autostorager.page.precedence')}</p>
-        <p class="text-neutral-600">
-          {t('autostorager.page.docker')}
-          <a
-            class="underline"
-            href="https://github.com/singlergold2/connect-local-autostorager#docker"
-            target="_blank"
-            rel="noreferrer"
-          >
-            {t('autostorager.page.dockerLink')}
-          </a>
-        </p>
+      <div class="flex flex-col gap-2">
+        <p class="text-base">{t('autostorager.page.what')}</p>
+        <p class="text-neutral-600 text-sm">{t('autostorager.page.delay')}</p>
       </div>
     </CardContent>
   </Card>
@@ -179,6 +166,7 @@
             <p class="text-neutral-500 text-xs">
               {t('autostorager.page.folderHint')}
             </p>
+            <p class="text-neutral-500 text-xs"></p>
           </div>
 
           <div class="flex flex-col gap-1">
@@ -228,6 +216,7 @@
             <span class="text-sm">{t('autostorager.page.moveOnSuccess')}</span>
           </div>
 
+          <p class="text-neutral-500 text-xs">{t('autostorager.page.names')}</p>
           <div class="flex items-center gap-2">
             <Button disabled={busy} onclick={save}
               >{t('autostorager.page.save')}</Button
