@@ -105,10 +105,17 @@ ui:
   # refuses a bundle its own version falls outside of.
   library: ">=0.1.0 <1.0.0"
   contributes:
-    # The whole of what this bundle may register. A registration the block
-    # does not declare is refused at run time and the app drops this module.
-    # Every entry here has one `host.register` call behind it in
-    # ui/src/index.ts, and the generator wrote the pair from one answer.
     pages:
       - path: autostorager
         title: Autostorager
+        icon: package
+      - path: autostorager-manual
+        title: Autostorager manual
+        icon: clipboard-list
+    cards:
+      - id: recent
+        title: Auto-Storager
+        description: The last files the folder watcher handed to the storage.
+        icon: package
+        size: {w: 4, h: 3}
+        least: {w: 3, h: 2}
