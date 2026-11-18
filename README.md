@@ -113,6 +113,24 @@ sudo mkdir -p /srv/autostorager
 sudo chown prusa-connect:prusa-connect /srv/autostorager
 ```
 
+### If Prusa Connect Local runs on this computer
+
+Then there is no share to set up. Create a folder, enter its path on the module's
+page, done. On Linux or macOS:
+
+```bash
+mkdir -p ~/Autostorager
+```
+
+On Windows:
+
+```powershell
+mkdir C:\Autostorager
+```
+
+The path is the whole configuration: `~/Autostorager`, `/Users/you/Autostorager`
+or `C:\Autostorager`. Save prints there and the module imports them.
+
 ### The easy way: a folder on the server, mounted on your PC
 
 1. **On the server**, create a folder and share it:

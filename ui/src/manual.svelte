@@ -33,6 +33,9 @@
       - /srv/autostorager:/incoming</pre>
         <p>{t('autostorager.manual.linuxPath')}</p>
 
+        <h3 class="mt-2 font-medium">{t('autostorager.manual.localTitle')}</h3>
+        <p>{t('autostorager.manual.local')}</p>
+
         <h3 class="mt-2 font-medium">{t('autostorager.manual.smbTitle')}</h3>
         <p>{t('autostorager.manual.smb')}</p>
 
