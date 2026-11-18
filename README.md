@@ -180,3 +180,29 @@ module's browser half: the credential is the session the person already has.
 | a screen shows a key instead of a sentence | the key is missing from `ui/src/locales/en.json` |
 | a response carries a code and an English sentence | the process refused the request. Look the code up in `faults.go` |
 | a change does not show | the install was not run again. Every change is a new install |
+
+## Mounting the folder on Linux
+
+The server usually runs in a container, and a container sees only what is
+mounted into it. A folder on the host is therefore invisible until it is handed
+over, and the path this module watches is the path *inside* the container.
+
+```yaml
+# docker-compose.yml, in the server's service
+services:
+  prusa-connect:
+    volumes:
+      - /srv/autostorager:/incoming
+```
+
+```bash
+docker compose up -d
+mkdir -p /srv/autostorager
+```
+
+Then enter `/incoming` as the folder on the module's page, not `/srv/autostorager`.
+The module creates `successful/` and `failed/` inside that folder itself, so the
+host sees them under `/srv/autostorager/successful` and `/srv/autostorager/failed`.
+
+On Windows and macOS the server is a normal process and the folder is read
+directly, so no mount is involved.

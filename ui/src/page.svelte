@@ -1,11 +1,21 @@
 <script lang="ts">
-  import { Button, Card, CardContent, Input, Label, PageHeader, Switch } from '@prusa/connect-ui/primitives';
+  import {
+    Button,
+    Card,
+    CardContent,
+    Input,
+    Label,
+    PageHeader,
+    Switch,
+  } from '@prusa/connect-ui/primitives';
   import { bind, type operations } from 'autostorager-client';
 
   import { heldHost } from './host';
 
-  type Answer = operations['read-autostorager']['responses'][200]['content']['application/json'];
-  type Settings = operations['read-settings']['responses'][200]['content']['application/json'];
+  type Answer =
+    operations['read-autostorager']['responses'][200]['content']['application/json'];
+  type Settings =
+    operations['read-settings']['responses'][200]['content']['application/json'];
 
   const host = heldHost();
   const t = host.t;
@@ -23,7 +33,8 @@
   async function load() {
     try {
       answer = await routes.readAutostorager({}, host.signal);
-      if (draft === undefined) draft = await routes.readSettings({}, host.signal);
+      if (draft === undefined)
+        draft = await routes.readSettings({}, host.signal);
     } catch {
       answer = undefined;
     }
@@ -76,9 +87,15 @@
         <p>{t('autostorager.page.what')}</p>
         <p class="text-neutral-600">{t('autostorager.page.delay')}</p>
         <p class="text-neutral-600">{t('autostorager.page.names')}</p>
+        <p class="text-neutral-600">{t('autostorager.page.precedence')}</p>
         <p class="text-neutral-600">
           {t('autostorager.page.docker')}
-          <a class="underline" href="https://github.com/singlergold2/connect-local-autostorager#docker" target="_blank" rel="noreferrer">
+          <a
+            class="underline"
+            href="https://github.com/singlergold2/connect-local-autostorager#docker"
+            target="_blank"
+            rel="noreferrer"
+          >
             {t('autostorager.page.dockerLink')}
           </a>
         </p>
@@ -101,7 +118,9 @@
                 if (target !== null) setFolder(target.value);
               }}
             />
-            <p class="text-neutral-500 text-xs">{t('autostorager.page.folderHint')}</p>
+            <p class="text-neutral-500 text-xs">
+              {t('autostorager.page.folderHint')}
+            </p>
           </div>
 
           <div class="flex flex-col gap-1">
@@ -114,7 +133,9 @@
                 if (target !== null) setInterval(target.value);
               }}
             />
-            <p class="text-neutral-500 text-xs">{t('autostorager.page.intervalHint')}</p>
+            <p class="text-neutral-500 text-xs">
+              {t('autostorager.page.intervalHint')}
+            </p>
           </div>
 
           <div class="flex flex-col gap-1">
@@ -139,7 +160,9 @@
                 if (target !== null) setMaxMB(target.value);
               }}
             />
-            <p class="text-neutral-500 text-xs">{t('autostorager.page.maxHint')}</p>
+            <p class="text-neutral-500 text-xs">
+              {t('autostorager.page.maxHint')}
+            </p>
           </div>
 
           <div class="flex items-center gap-2">
@@ -148,7 +171,9 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <Button disabled={busy} onclick={save}>{t('autostorager.page.save')}</Button>
+            <Button disabled={busy} onclick={save}
+              >{t('autostorager.page.save')}</Button
+            >
             {#if notice !== ''}<span class="text-sm">{notice}</span>{/if}
           </div>
         </div>
@@ -161,15 +186,21 @@
       <CardContent>
         <h3 class="mb-2 font-medium">{t('autostorager.page.recent')}</h3>
         {#if answer.recent.length === 0}
-          <p class="text-neutral-500 text-sm">{t('autostorager.page.nothingYet')}</p>
+          <p class="text-neutral-500 text-sm">
+            {t('autostorager.page.nothingYet')}
+          </p>
         {:else}
           <ul class="flex flex-col gap-1 text-sm">
             {#each answer.recent as entry (entry.at + entry.source)}
-              <li class="border-neutral-200 flex flex-wrap items-center gap-2 border-t pt-1">
+              <li
+                class="border-neutral-200 flex flex-wrap items-center gap-2 border-t pt-1"
+              >
                 <span class="text-neutral-500">{entry.at}</span>
                 <span>{entry.source}</span>
                 <span class="ml-auto">{entry.result}</span>
-                {#if entry.detail}<span class="text-neutral-500">{entry.detail}</span>{/if}
+                {#if entry.detail}<span class="text-neutral-500"
+                    >{entry.detail}</span
+                  >{/if}
               </li>
             {/each}
           </ul>

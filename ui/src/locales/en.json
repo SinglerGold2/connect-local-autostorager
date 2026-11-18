@@ -22,5 +22,6 @@
   "autostorager.page.maxHint": "A larger file is moved into failed/ with a reason instead of being imported.",
   "autostorager.page.save": "Save",
   "autostorager.page.saved": "Saved.",
-  "autostorager.page.dockerLink": "Mounting the folder on Linux"
+  "autostorager.page.dockerLink": "Mounting the folder on Linux",
+  "autostorager.page.precedence": "What is saved on this page wins over the same settings on the module's own dashboard page, so a value typed here survives a restart."
 }
