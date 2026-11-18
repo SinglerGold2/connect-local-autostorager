@@ -39,6 +39,24 @@ var (
 		fault.ShowDetail,
 		"path",
 	))
+
+	// InvalidInput is a request this module refuses before it writes anything.
+	InvalidInput = fault.Register(faultDomain, "INVALID_INPUT", http.StatusBadRequest, fault.Document(
+		"The request cannot be applied",
+		"Read the sentence and the parameter beside it. Nothing was written.",
+		fault.RetryNever,
+		fault.ShowDetail,
+		"reason",
+	))
+
+	// StoreFailed is the module's own database refusing the write.
+	StoreFailed = fault.Register(faultDomain, "STORE_FAILED", http.StatusInternalServerError, fault.Document(
+		"The settings could not be stored",
+		"The module's database refused the write. Read the reason and the server log, then try again.",
+		fault.RetryAllowed,
+		fault.ShowDetail,
+		"reason",
+	))
 )
 
 // mustDomain builds this module's fault domain. A name the sdk refuses is a

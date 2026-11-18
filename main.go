@@ -35,7 +35,7 @@ package main
 
 import (
 	"context"
-	_ "embed"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -43,12 +43,15 @@ import (
 	"os/signal"
 	"sync/atomic"
 
+	"database/sql"
 	"github.com/prusa3d/prusa-connect/sdk/extension"
 	"github.com/prusa3d/prusa-connect/sdk/fault"
+	"github.com/prusa3d/prusa-connect/sdk/moduledb"
 	"github.com/prusa3d/prusa-connect/sdk/routesapi"
 	"github.com/prusa3d/prusa-connect/sdk/storageapi"
 	"github.com/prusa3d/prusa-connect/sdk/wire"
 	"github.com/prusa3d/prusa-connect/sdk/wirerpc"
+	_ "modernc.org/sqlite"
 )
 
 // What this child reports when the host asks it what it is. The name is the
@@ -104,6 +107,20 @@ type Settings struct {
 //
 //nolint:gochecknoglobals // the one piece of state this skeleton has.
 var held atomic.Pointer[Settings]
+
+// migrations is this module's database schema, embedded because the host runs
+// it on the module's behalf.
+//
+//go:embed migrations/sqlite/* migrations/postgres/*
+var migrations embed.FS
+
+// schema is what the host applies: the embedded files, in name order.
+var schema = moduledb.Schema{Migrations: migrations}
+
+// db is the module's own database, nil when the host granted none.
+//
+//nolint:gochecknoglobals // the one handle the settings live behind.
+var db *sql.DB
 
 // withDefaults fills what a host that sends nothing would leave empty.
 func withDefaults(sent Settings) Settings {
@@ -211,8 +228,19 @@ func methods() wirerpc.Methods {
 		},
 		// The settings the host merged from module.yaml's defaults and this
 		// instance's config block, sent once before the first request.
-		wirerpc.MethodConfigure: wirerpc.Configure(func(_ context.Context, sent Settings) error {
+		wirerpc.MethodConfigure: wirerpc.ConfigureGranted(func(ctx context.Context, sent Settings, grants wirerpc.Grants) error {
 			sent = withDefaults(sent)
+
+			if grants.Database != nil {
+				opened, _, err := moduledb.Open(ctx, *grants.Database, schema)
+				if err != nil {
+					return fmt.Errorf("open the database: %w", err)
+				}
+
+				db = opened
+				sent = merged(ctx, sent)
+			}
+
 			held.Store(&sent)
 			startWatcher(sent)
 
@@ -232,6 +260,62 @@ func methods() wirerpc.Methods {
 // /api/v1/modules/com.github.aux.singlergold2.connect-local-autostorager/autostorager to a caller.
 func routes() http.Handler {
 	mux := http.NewServeMux()
+
+	mux.HandleFunc("GET /settings", func(w http.ResponseWriter, r *http.Request) {
+		answer(w, http.StatusOK, settings())
+	})
+
+	mux.HandleFunc("PUT /settings", func(w http.ResponseWriter, r *http.Request) {
+		current := settings()
+
+		var sent struct {
+			Folder          *string `json:"folder"`
+			IntervalSeconds *int    `json:"interval_seconds"`
+			Storage         *string `json:"storage"`
+			MaxMB           *int    `json:"max_mb"`
+			MoveOnSuccess   *bool   `json:"move_on_success"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&sent); err != nil {
+			refuse(w, r, InvalidInput.New("the request is not a settings document"))
+			return
+		}
+
+		if sent.Folder != nil {
+			current.Folder = *sent.Folder
+		}
+
+		if sent.IntervalSeconds != nil {
+			current.IntervalSeconds = *sent.IntervalSeconds
+		}
+
+		if sent.Storage != nil {
+			current.Storage = *sent.Storage
+		}
+
+		if sent.MaxMB != nil {
+			current.MaxMB = *sent.MaxMB
+		}
+
+		if sent.MoveOnSuccess != nil {
+			current.MoveOnSuccess = *sent.MoveOnSuccess
+		}
+
+		if err := validate(current); err != nil {
+			refuse(w, r, InvalidInput.New(err.Error()))
+			return
+		}
+
+		if err := save(r.Context(), current); err != nil {
+			refuse(w, r, StoreFailed.New("the settings could not be written").With(fault.StringParam("reason", err.Error())))
+			return
+		}
+
+		held.Store(&current)
+		startWatcher(current)
+
+		answer(w, http.StatusOK, current)
+	})
 
 	mux.HandleFunc("GET /autostorager", func(w http.ResponseWriter, r *http.Request) {
 		answer(w, http.StatusOK, map[string]any{

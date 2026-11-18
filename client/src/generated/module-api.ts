@@ -24,10 +24,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/modules/com.github.aux.singlergold2.connect-local-autostorager/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The settings this module runs on
+         * @description What the page shows: the folder it watches, how often it looks, the storage it writes into, the size limit and whether the source is moved after an import.
+         */
+        get: operations["read-settings"];
+        /**
+         * Change the settings
+         * @description Writes the values the page sends, restarts the watcher on the folder they name and answers with what is now in force.
+         */
+        put: operations["save-settings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: never;
+    schemas: {
+        Settings: {
+            folder: string;
+            interval_seconds: number;
+            storage: string;
+            max_mb: number;
+            move_on_success: boolean;
+            message?: string;
+        };
+    };
     responses: never;
     parameters: never;
     requestBodies: never;
@@ -69,6 +102,50 @@ export interface operations {
                         }[];
                         principal?: string;
                     };
+                };
+            };
+        };
+    };
+    "read-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The settings in force. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Settings"];
+                };
+            };
+        };
+    };
+    "save-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Settings"];
+            };
+        };
+        responses: {
+            /** @description The settings in force. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Settings"];
                 };
             };
         };

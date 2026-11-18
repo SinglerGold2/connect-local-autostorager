@@ -80,8 +80,9 @@ options:
     summary: Move the source file into successful/ after the import is committed.
 
 # The memory in MiB the server may budget for the process, children included.
-# needs:
-#   memory_mib: 256
+needs:
+  # The settings a person edits on the page live in the module's own database.
+  database: true
 
 # The actions this module may take as itself are a request rather than a grant.
 # Add them here and the operator reads them before `module add -approve` writes

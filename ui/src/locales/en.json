@@ -16,5 +16,11 @@
   "autostorager.page.nothingYet": "Nothing imported yet.",
   "autostorager.page.none": "not set",
   "autostorager.page.yes": "move the source into successful/",
-  "autostorager.page.no": "leave the source where it is"
+  "autostorager.page.no": "leave the source where it is",
+  "autostorager.page.folderHint": "The absolute path on the server. Under Linux in a container this is the path inside the container, so the host folder has to be mounted first.",
+  "autostorager.page.intervalHint": "Seconds between two looks into the folder. 60 s = 1 min. A very short interval means constant requests, which costs I/O on a network share; five seconds is enough for most folders.",
+  "autostorager.page.maxHint": "A larger file is moved into failed/ with a reason instead of being imported.",
+  "autostorager.page.save": "Save",
+  "autostorager.page.saved": "Saved.",
+  "autostorager.page.dockerLink": "Mounting the folder on Linux"
 }

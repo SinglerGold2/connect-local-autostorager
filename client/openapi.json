@@ -1,4 +1,38 @@
 {
+  "components": {
+    "schemas": {
+      "Settings": {
+        "type": "object",
+        "properties": {
+          "folder": {
+            "type": "string"
+          },
+          "interval_seconds": {
+            "type": "integer"
+          },
+          "storage": {
+            "type": "string"
+          },
+          "max_mb": {
+            "type": "integer"
+          },
+          "move_on_success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "folder",
+          "interval_seconds",
+          "storage",
+          "max_mb",
+          "move_on_success"
+        ]
+      }
+    }
+  },
   "info": {
     "title": "autostorager",
     "version": "0.1.0",
@@ -86,6 +120,52 @@
                     "settings",
                     "recent"
                   ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/modules/com.github.aux.singlergold2.connect-local-autostorager/settings": {
+      "get": {
+        "operationId": "read-settings",
+        "summary": "The settings this module runs on",
+        "description": "What the page shows: the folder it watches, how often it looks, the storage it writes into, the size limit and whether the source is moved after an import.",
+        "responses": {
+          "200": {
+            "description": "The settings in force.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "save-settings",
+        "summary": "Change the settings",
+        "description": "Writes the values the page sends, restarts the watcher on the folder they name and answers with what is now in force.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Settings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The settings in force.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
                 }
               }
             }

@@ -7,6 +7,8 @@ import type { operations } from "./module-api.js";
 /** Every operation the document declares, keyed by its operationId. */
 export const operationTable = {
   "read-autostorager": { id: "read-autostorager", method: "GET", path: "/api/v1/modules/com.github.aux.singlergold2.connect-local-autostorager/autostorager", response: "json", anonymous: false },
+  "read-settings": { id: "read-settings", method: "GET", path: "/api/v1/modules/com.github.aux.singlergold2.connect-local-autostorager/settings", response: "json", anonymous: false },
+  "save-settings": { id: "save-settings", method: "PUT", path: "/api/v1/modules/com.github.aux.singlergold2.connect-local-autostorager/settings", body: "application/json", response: "json", anonymous: false },
 } as const satisfies Record<string, Operation>;
 
 /** The routes of module com.github.aux.singlergold2.connect-local-autostorager, one method per operation, bound to one transport. */
@@ -20,11 +22,35 @@ export interface Operations {
     request?: Record<string, never>,
     signal?: AbortSignal,
   ): Promise<operations["read-autostorager"]["responses"][200]["content"]["application/json"]>;
+
+  /**
+   * GET /api/v1/modules/com.github.aux.singlergold2.connect-local-autostorager/settings
+   *
+   * The settings this module runs on
+   */
+  readSettings(
+    request?: Record<string, never>,
+    signal?: AbortSignal,
+  ): Promise<operations["read-settings"]["responses"][200]["content"]["application/json"]>;
+
+  /**
+   * PUT /api/v1/modules/com.github.aux.singlergold2.connect-local-autostorager/settings
+   *
+   * Change the settings
+   */
+  saveSettings(
+    request: {
+      body: NonNullable<operations["save-settings"]["requestBody"]>["content"]["application/json"];
+    },
+    signal?: AbortSignal,
+  ): Promise<operations["save-settings"]["responses"][200]["content"]["application/json"]>;
 }
 
 /** bindOperations closes every operation over the transport that sends it. */
 export function bindOperations(transport: Transport): Operations {
   return {
     readAutostorager: (request = {}, signal) => transport.call(operationTable["read-autostorager"], request, signal),
+    readSettings: (request = {}, signal) => transport.call(operationTable["read-settings"], request, signal),
+    saveSettings: (request, signal) => transport.call(operationTable["save-settings"], request, signal),
   };
 }
