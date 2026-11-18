@@ -1,4 +1,4 @@
-# <img src="artwork/icon.svg" width="40" align="center" alt=""> Auto-Storager
+# <img src="artwork/icon.svg" width="40" align="center" alt=""> Autostorager
 
 A Prusa Connect Local extension that watches up to four folders and hands every
 print file it finds to the server's storage. The file arrives there like a
@@ -77,7 +77,7 @@ quarantine flag once with `xattr -d com.apple.quarantine <file>`.
 
 ## Configuration
 
-Everything is set on the extension's own page: **Auto-Storager** in the sidebar.
+Everything is set on the extension's own page: **Autostorager** in the sidebar.
 
 ### Linux, server in a container
 
@@ -163,7 +163,7 @@ returned.
 
 **3. Enter that folder on the module's page.**
 
-![The Auto-Storager page with /app/config/pc-in in the folder field](docs/howto/3-enter-the-folder.webp)
+![The Autostorager page with /app/config/pc-in in the folder field](docs/howto/3-enter-the-folder.webp)
 
 **4. The file appears in Storage.**
 
@@ -205,7 +205,7 @@ Linux     //192.168.178.3/autostorager /mnt/y cifs username=your-user,uid=1000 0
 macOS     Finder, Gehe zu, smb://192.168.178.3/autostorager
 ```
 
-3. **In Auto-Storager**, enter the server path of that folder, `/srv/autostorager`.
+3. **In Autostorager**, enter the server path of that folder, `/srv/autostorager`.
    If the server runs in a container, enter the path the container sees, not the
    host path. That is the one thing that catches people out: a container only
    sees what is mounted into it.

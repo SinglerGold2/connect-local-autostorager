@@ -24,7 +24,7 @@ license: MIT
 # them into the declaration, so `GET /api/v1/resources` carries them for an
 # installed module. Write your own sentence here, a title if the name alone reads badly, and your name or
 # your team's beside it.
-title: Auto-Storager
+title: Autostorager
 summary: Watches up to four folders and hands every print file to the storage.
 codeowner: singlergold2
 # The module wire major the process half speaks.
@@ -114,7 +114,7 @@ ui:
         icon: clipboard-list
     cards:
       - id: recent
-        title: Auto-Storager
+        title: Autostorager
         description: The last files the folder watcher handed to the storage.
         icon: package
         size: {w: 4, h: 3}
