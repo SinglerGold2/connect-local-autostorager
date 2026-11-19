@@ -308,8 +308,14 @@ next run. One version, one folder:
   autostorager-<version>.tar.gz
   autostorager-<version>-windows-amd64.zip
   RELEASE-<version>.md      the release notes, the text of the GitHub page
-  build/                    the unpacked release directory, as it was built
+  autostorager_darwin_arm64 the four binaries, one per platform
+  autostorager_linux_amd64
+  autostorager_linux_arm64
+  autostorager_windows_amd64.exe
 ```
+
+What is not uploaded to the release page is not kept: the unpacked release
+directory is scratch, and its contents are covered by the bundle.
 
 `~/harness/autostorager-release/README.md` carries the same rule.
 
