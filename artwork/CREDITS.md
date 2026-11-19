@@ -1,7 +1,7 @@
 # Artwork credits
 
-`logo.svg`, `logo.png`, `github_logo.svg` and `github_logo.png` combine two
-icons from SVG Repo. `github_logo.png` is the 1:1 GitHub logo, not the
+`logo.svg`, `logo.png`, `autostorager-1x1.svg` and `marketplace.png` combine
+two icons from SVG Repo. `marketplace.png` is the 1:1 upload for the
 marketplace listing; `logo.svg` and `logo.png` are the mark beside the README
 title.
 
@@ -19,6 +19,6 @@ anyway. Both icons were recoloured and combined, which the credit line says.
 ```
 logo.svg                512x512   the mark beside the README title
 logo.png                512x512   the same mark, rendered, used in the README
-github_logo.png        2048x2048  the 1:1 GitHub logo, lossless, 83 KB
-github_logo.svg        2048x2048  the 16:9 composition on a square canvas
+marketplace.png        2048x2048  the 1:1 marketplace upload, lossless, 83 KB
+autostorager-1x1.svg   2048x2048  the 16:9 composition on a square canvas
 ```

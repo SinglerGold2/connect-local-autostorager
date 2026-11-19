@@ -341,7 +341,7 @@ locally also carries `build/`.
 
 ## Artwork
 
-`artwork/logo.svg`, `artwork/logo.png`, `artwork/github_logo.png` and the 16:9
+`artwork/logo.svg`, `artwork/logo.png`, `artwork/marketplace.png` and the 16:9
 banner combine two icons from SVG Repo:
 
 | Icon | Author | Licence |
