@@ -57,6 +57,14 @@ var (
 		fault.ShowDetail,
 		"reason",
 	))
+
+	// NotAllowed is a write the caller may not make.
+	NotAllowed = fault.Register(faultDomain, "NOT_ALLOWED", http.StatusForbidden, fault.Document(
+		"The caller may not change the settings",
+		"Changing the settings takes operate_resource on this module. Ask an operator.",
+		fault.RetryNever,
+		fault.ShowDetail,
+	))
 )
 
 // mustDomain builds this module's fault domain. A name the sdk refuses is a

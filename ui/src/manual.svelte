@@ -51,7 +51,31 @@
   <Card>
     <CardContent>
       <div class="flex flex-col gap-3 text-sm">
-        <h3 class="font-semibold">{m('whatTitle')}</h3>
+        <h3 class="font-semibold">{m('beforeTitle')}</h3>
+
+        <div
+          class="mt-3 rounded-md border border-state-fault-edge bg-state-fault/10 p-3"
+        >
+          <p
+            class="text-xs font-semibold tracking-wide text-state-fault-text uppercase"
+          >
+            {m('rightsImportant')}
+          </p>
+          <h3 class="mt-1 font-semibold">{m('rightsTitle')}</h3>
+          <p class="mt-2">{m('rights')}</p>
+          <p>{m('rightsSystems')}</p>
+          <ul class="ml-4 list-disc">
+            <li>{m('rightsViewer')}</li>
+            <li>{m('rightsOperator')}</li>
+            <li>{m('rightsAdmin')}</li>
+          </ul>
+          <pre class="bg-neutral-100 rounded overflow-x-auto p-2 text-xs">{m(
+              'rightsGrant',
+            )}</pre>
+          <p class="text-neutral-500">{m('rightsNote')}</p>
+        </div>
+
+        <h3 class="mt-2 font-semibold">{m('whatTitle')}</h3>
         <p>{m('what')}</p>
 
         <h3 class="mt-2 font-semibold">{m('flowTitle')}</h3>

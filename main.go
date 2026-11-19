@@ -45,6 +45,7 @@ import (
 	"sync/atomic"
 
 	"database/sql"
+	"github.com/prusa3d/prusa-connect/sdk/accessapi"
 	"github.com/prusa3d/prusa-connect/sdk/extension"
 	"github.com/prusa3d/prusa-connect/sdk/fault"
 	"github.com/prusa3d/prusa-connect/sdk/moduledb"
@@ -59,7 +60,7 @@ import (
 // manifest's, and the host holds the two to each other.
 const (
 	name    = "autostorager"
-	release = extension.Version("0.2.0")
+	release = extension.Version("0.2.1")
 )
 
 // defaultMessage is the line the route answers with when the operator sets
@@ -135,6 +136,18 @@ var schema = moduledb.Schema{Migrations: migrations}
 //
 //nolint:gochecknoglobals // the one handle the settings live behind.
 var db *sql.DB
+
+// accessChecker is the part of the access client the settings route asks.
+// The interface keeps the route testable without a host on the wire.
+type accessChecker interface {
+	Check(context.Context, accessapi.CheckParams) (accessapi.Decision, error)
+}
+
+// access is the host's authorization graph, used to ask whether the caller
+// may change the settings. It rides on the same session as the storage client.
+//
+//nolint:gochecknoglobals // the one client the routes share.
+var access accessChecker
 
 // withDefaults fills what a host that sends nothing would leave empty.
 func withDefaults(sent Settings) Settings {
@@ -232,6 +245,10 @@ func run() error {
 	// this module and the host checks its write_storage permission.
 	store = storageapi.NewClient(conn)
 
+	// The same session answers the authorization question a write has to ask:
+	// may this caller change the settings?
+	access = accessapi.NewClient(conn)
+
 	// The pid is here because the host's log is the only place a person sees
 	// this process. Nothing on the wire carries it.
 	fmt.Fprintf(os.Stderr, "%s %s is serving on stdio as pid %d\n", name, release, os.Getpid())
@@ -287,6 +304,30 @@ func methods() wirerpc.Methods {
 	}
 }
 
+// mayOperate asks the host whether the caller may change this module's
+// settings. A read-only caller is refused before the request body is read.
+func mayOperate(w http.ResponseWriter, r *http.Request) bool {
+	if access == nil {
+		refuse(w, r, NotAllowed.New("the caller may not change the settings"))
+
+		return false
+	}
+
+	decision, err := access.Check(r.Context(), accessapi.CheckParams{
+		Subject:    routesapi.PrincipalOf(r),
+		Action:     "operate_resource",
+		ObjectType: "resource_kind",
+		ObjectID:   "sink",
+	})
+	if err != nil || !decision.Allowed {
+		refuse(w, r, NotAllowed.New("the caller may not change the settings"))
+
+		return false
+	}
+
+	return true
+}
+
 // routes is the surface this module serves, written as any Go program writes
 // one. The paths carry no prefix: /autostorager here is
 // /api/v1/modules/com.github.aux.singlergold2.connect-local-autostorager/autostorager to a caller.
@@ -298,6 +339,10 @@ func routes() http.Handler {
 	})
 
 	mux.HandleFunc("PUT /settings", func(w http.ResponseWriter, r *http.Request) {
+		if !mayOperate(w, r) {
+			return
+		}
+
 		current := settings()
 
 		var sent struct {

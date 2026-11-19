@@ -5,6 +5,26 @@ print file it finds to the server's storage. The file arrives there like a
 manual upload: with its preview, its slicer details and its print time. Nothing
 is moved or deleted before the copy is complete.
 
+## Users and rights
+
+> [!IMPORTANT]
+> Prusa Connect Local keeps its own accounts. The first account created at setup is administrator of `org:local`. An administrator adds people under Settings > People; the role on the organization is written with the grant below. The server's root shell is not a PCL account.
+>
+> The first account is created on the setup page from a code in the server log: `docker logs` for a container, `journalctl -u` for a service, or the console on macOS and Windows. The roles are the same on Linux, macOS and Windows. They live in the server's database, not in the operating system's users. On Windows the server may need to be started as Administrator to bind a port or reach a folder, but that does not make the browser account an admin; the PCL account and its role do. On Linux and macOS the server usually runs as a service user, and the watched folder has to be readable and writable by that user.
+
+- `viewer`: may read, not change. The Autostorager page is visible; Save answers 403.
+- `operator`: may change the extension's settings; Save takes `operate_resource` on `resource_kind:sink`.
+- `admin`: the highest role on `org:local`; it includes `operator`.
+
+Grant a role with an administrator's session:
+
+```http
+POST /api/v1/grants/org/local
+{"relation":"operator","subject":"user:<id>"}
+```
+
+Use `admin` instead of `operator` for admin rights, and `viewer` for read-only. The id comes from Settings > People or the answer to `POST /api/v1/auth/accounts`.
+
 ## Installation
 
 The extension is a normal module. Install it the way your server takes modules.
@@ -12,10 +32,10 @@ The extension is a normal module. Install it the way your server takes modules.
 ### Linux, server in a container
 
 ```bash
-docker cp autostorager-0.2.0.tar.gz prusa-connect-local:/tmp/
+docker cp autostorager-0.2.1.tar.gz prusa-connect-local:/tmp/
 docker exec -w /app prusa-connect-local /app/prusa_connect_local \
-  module add github.com/singlergold2/connect-local-autostorager@0.2.0 \
-  -from /tmp/autostorager-0.2.0.tar.gz -approve -database sqlite
+  module add github.com/singlergold2/connect-local-autostorager@0.2.1 \
+  -from /tmp/autostorager-0.2.1.tar.gz -approve -database sqlite
 docker restart prusa-connect-local
 ```
 
@@ -31,8 +51,8 @@ Run the command as the user that owns that data, then restart the unit.
 ```bash
 sudo systemctl stop prusa-connect
 sudo -u prusa-connect /opt/prusa-connect/prusa_connect_local module add \
-  github.com/singlergold2/connect-local-autostorager@0.2.0 \
-  -from /tmp/autostorager-0.2.0.tar.gz -approve -database sqlite
+  github.com/singlergold2/connect-local-autostorager@0.2.1 \
+  -from /tmp/autostorager-0.2.1.tar.gz -approve -database sqlite
 sudo systemctl start prusa-connect
 ```
 
@@ -49,16 +69,16 @@ server afterwards.
 
 ```bash
 cd ~/prusa-connect
-./prusa_connect_local module add github.com/singlergold2/connect-local-autostorager@0.2.0 \
-  -from ~/Downloads/autostorager-0.2.0.tar.gz -approve -database sqlite
+./prusa_connect_local module add github.com/singlergold2/connect-local-autostorager@0.2.1 \
+  -from ~/Downloads/autostorager-0.2.1.tar.gz -approve -database sqlite
 ```
 
 ### Windows
 
 ```powershell
 cd C:\prusa-connect
-.\prusa_connect_windows_amd64.exe module add github.com/singlergold2/connect-local-autostorager@0.2.0 `
-  -from C:\Users\you\Downloads\autostorager-0.2.0.tar.gz -approve -database sqlite
+.\prusa_connect_windows_amd64.exe module add github.com/singlergold2/connect-local-autostorager@0.2.1 `
+  -from C:\Users\you\Downloads\autostorager-0.2.1.tar.gz -approve -database sqlite
 ```
 
 Then restart the server. The module lands under
@@ -68,8 +88,8 @@ Then restart the server. The module lands under
 
 ```bash
 cd ~/prusa-connect
-./prusa_connect_macos_arm64 module add github.com/singlergold2/connect-local-autostorager@0.2.0 \
-  -from ~/Downloads/autostorager-0.2.0.tar.gz -approve -database sqlite
+./prusa_connect_macos_arm64 module add github.com/singlergold2/connect-local-autostorager@0.2.1 \
+  -from ~/Downloads/autostorager-0.2.1.tar.gz -approve -database sqlite
 ```
 
 Then restart the server. If macOS refuses a downloaded file, clear the
@@ -290,8 +310,8 @@ whether it holds up.
 A release is published from GitHub, never by hand:
 
 ```bash
-git tag -a v0.2.0 -m "Autostorager 0.2.0"
-git push origin v0.2.0
+git tag -a v0.2.1 -m "Autostorager 0.2.1"
+git push origin v0.2.1
 ```
 
 Publishing that release on GitHub starts `.github/workflows/release.yml`, which

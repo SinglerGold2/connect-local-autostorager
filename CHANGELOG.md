@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.2.1 - 2026-11-19
+
+### Fixed
+
+- `PUT /settings` now asks the host for `operate_resource` on the module before
+  it reads the request. A read-only signed-in user can no longer change the
+  watched folders, the interval, the storage, the size limit or the move
+  setting.
+- The compiled `connect-local-autostorager` binary is gone from the
+  repository, and `.gitignore` keeps it out.
+- The manual's GitHub link is declared under `egress` in `module.yaml`, so the
+  marketplace's egress check passes.
+
+### Notes
+
+- 0.2.1 carries the 0.2.0 language system, card and manual changes. The 0.2.0
+  submission was rejected before publication; 0.2.1 replaces it.
+
 ## 0.2.0 - 2026-11-19
 
 ### Added

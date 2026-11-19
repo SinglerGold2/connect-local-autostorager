@@ -15,7 +15,7 @@ name: autostorager
 # which is what a module with a process needs. The browser half is declared
 # beside it, as `service.assets`.
 kind: sink
-version: 0.2.0
+version: 0.2.1
 # The licence this module is released under. The marketplace shows it and
 # refuses a release without one. An SPDX identifier is the usual form.
 license: MIT
@@ -44,6 +44,14 @@ platforms:
   - linux_arm64
   - darwin_arm64
   - windows_amd64
+
+# Every connection the page makes outside Prusa Connect. The manual links to
+# the module's repository; the marketplace checks the host against the code.
+egress:
+  - host: github.com
+    from: ui
+    why: Opens the module's repository from the manual's contribution link.
+    sends: Only the request for the repository page.
 
 # Every setting this module reads, each with its type, its default and one
 # sentence saying what it controls. The host applies every default, writes the
@@ -98,6 +106,11 @@ needs:
 # no sync loop, no background work. Write one line per permission saying what it
 # lets this module do.
 #
+# The module asks the host whether the caller may change its settings, so
+# operate_resource is a check rather than a grant. A check writes no grant.
+checks:
+  - operate_resource
+
 permissions:
   # The import writes into the storage and looks up whether a name is free, so
   # it asks for both halves: the write the HTTP upload takes, and the read that

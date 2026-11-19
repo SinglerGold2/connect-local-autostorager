@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -8,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/prusa3d/prusa-connect/sdk/accessapi"
 )
 
 // TestTheRouteAnswers is the permit half: the path openapi.json declares
@@ -138,5 +141,73 @@ func TestNoSettingIsReadFromTheEnvironment(t *testing.T) {
 
 	if strings.Contains(string(source), "os.Getenv") {
 		t.Fatal("main.go reads an environment variable. Declare the setting in module.yaml instead")
+	}
+}
+
+// TestTheSettingsWriteRefusesWithoutAnAccessClient is the fail-closed half:
+// a settings write must not reach the body when the module cannot ask the
+// host whether the caller may operate it.
+func TestTheSettingsWriteRefusesWithoutAnAccessClient(t *testing.T) {
+	access = nil
+
+	recorder := httptest.NewRecorder()
+	routes().ServeHTTP(recorder, httptest.NewRequest(http.MethodPut, "/settings", strings.NewReader(`{}`)))
+
+	if recorder.Code != http.StatusForbidden {
+		t.Fatalf("PUT /settings answered %d without an access client, want %d", recorder.Code, http.StatusForbidden)
+	}
+}
+
+// fakeAccess answers the access question without a host on the wire.
+type fakeAccess struct {
+	decision accessapi.Decision
+	err      error
+	params   accessapi.CheckParams
+	called   bool
+}
+
+func (f *fakeAccess) Check(_ context.Context, p accessapi.CheckParams) (accessapi.Decision, error) {
+	f.called = true
+	f.params = p
+
+	return f.decision, f.err
+}
+
+// TestTheSettingsWriteAsksForOperateResource keeps the write tied to the
+// module's own instance: the caller must be allowed to operate sink:autostorager,
+// not some other object the assertion happens to pass.
+func TestTheSettingsWriteAsksForOperateResource(t *testing.T) {
+	previous := access
+	t.Cleanup(func() { access = previous })
+
+	fake := &fakeAccess{decision: accessapi.Decision{Allowed: true}}
+	access = fake
+
+	recorder := httptest.NewRecorder()
+	routes().ServeHTTP(recorder, httptest.NewRequest(http.MethodPut, "/settings", strings.NewReader(`{}`)))
+
+	if !fake.called {
+		t.Fatal("PUT /settings did not ask the access client")
+	}
+
+	if fake.params.Action != "operate_resource" || fake.params.ObjectType != "resource_kind" || fake.params.ObjectID != "sink" {
+		t.Fatalf("asked %q on %s:%s, want operate_resource on resource_kind:sink",
+			fake.params.Action, fake.params.ObjectType, fake.params.ObjectID)
+	}
+}
+
+// TestTheSettingsWriteRefusesWhenOperateResourceIsDenied is the refusal half:
+// a caller the graph refuses never reaches the body.
+func TestTheSettingsWriteRefusesWhenOperateResourceIsDenied(t *testing.T) {
+	previous := access
+	t.Cleanup(func() { access = previous })
+
+	access = &fakeAccess{decision: accessapi.Decision{Allowed: false}}
+
+	recorder := httptest.NewRecorder()
+	routes().ServeHTTP(recorder, httptest.NewRequest(http.MethodPut, "/settings", strings.NewReader(`{}`)))
+
+	if recorder.Code != http.StatusForbidden {
+		t.Fatalf("PUT /settings answered %d for a refused caller, want %d", recorder.Code, http.StatusForbidden)
 	}
 }

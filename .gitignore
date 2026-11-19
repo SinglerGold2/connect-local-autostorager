@@ -5,3 +5,6 @@ ui/dist/
 .core
 release/
 bin/
+
+# A locally built binary from install.sh, never part of the source.
+/connect-local-autostorager
