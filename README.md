@@ -1,4 +1,4 @@
-# <img src="artwork/logo.svg" width="40" align="center" alt=""> Autostorager
+# <img src="artwork/logo.png" width="40" align="center" alt=""> Autostorager
 
 A Prusa Connect Local extension that watches up to four folders and hands every
 print file it finds to the server's storage. The file arrives there like a
