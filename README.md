@@ -295,7 +295,41 @@ Two things have to exist in the repository for that to work:
 | Trusted publisher for `singlergold2/connect-local-autostorager` with the id `com.github.aux.singlergold2.connect-local-autostorager` | the marketplace's author console |
 
 The tag's version must equal `version:` in `module.yaml`, and the release must
-not be labeled pre-release. pnpm is pinned at 11.3.0 in `client/package.json` and
+not be labeled pre-release.
+
+### Where the files go
+
+Every build worth keeping goes to `~/harness/autostorager-release/<version>/`,
+never to `release/` in the project: `make release` wipes that directory on the
+next run. One version, one folder:
+
+```
+<version>/
+  autostorager-<version>.tar.gz
+  autostorager-<version>-windows-amd64.zip
+  build/                    the unpacked release directory, as it was built
+```
+
+`~/harness/autostorager-release/README.md` carries the same rule.
+
+For a test server, the build does not have to come from the marketplace. Build
+and sign by hand, install that bundle, and archive it in the same place:
+
+```bash
+make release
+cd release
+find . -type f ! -name 'checksums.txt*' | sort | sed 's|^\./||' | xargs sha256sum > checksums.txt
+openssl dgst -sha256 -sign ~/harness/maintenance-signing/private_key.pem \
+  -out /tmp/sig.bin checksums.txt
+base64 -w0 /tmp/sig.bin > checksums.txt.sig
+tar czf /tmp/autostorager-<version>.tar.gz *
+```
+
+The marketplace bundle is signed with the repository's key and built from the
+tagged commit; a local bundle is for the test server only, and the archive says
+nothing about which of the two it is. The folder name does: a version built
+locally also carries `build/`.
+ pnpm is pinned at 11.3.0 in `client/package.json` and
 `ui/package.json`, because the lockfiles are written by that version.
 
 ## Licence
