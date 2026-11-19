@@ -3,6 +3,7 @@
   import { bind, type operations } from 'autostorager-client';
 
   import { heldHost } from '../host';
+  import { applyLanguage, t } from '../i18n.svelte';
 
   type Answer =
     operations['read-autostorager']['responses'][200]['content']['application/json'];
@@ -10,7 +11,6 @@
   let { title }: CardProps = $props();
 
   const host = heldHost();
-  const t = host.t;
   const routes = bind(host.client);
 
   const heading = $derived(
@@ -23,6 +23,7 @@
     const load = async () => {
       try {
         answer = await routes.readAutostorager({}, host.signal);
+        applyLanguage(answer.language);
       } catch {
         answer = undefined;
       }

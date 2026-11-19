@@ -114,12 +114,16 @@
                         ]
                       }
                     },
+                    "language": {
+                      "type": "string"
+                    },
                     "principal": {
                       "type": "string"
                     }
                   },
                   "required": [
                     "message",
+                    "language",
                     "settings",
                     "recent"
                   ]

@@ -11,6 +11,7 @@
   import { bind, type operations } from 'autostorager-client';
 
   import { heldHost } from './host';
+  import { applyLanguage, t } from './i18n.svelte';
 
   type Answer =
     operations['read-autostorager']['responses'][200]['content']['application/json'];
@@ -20,7 +21,6 @@
   const maxFolders = 4;
 
   const host = heldHost();
-  const t = host.t;
   const routes = bind(host.client);
 
   let answer = $state<Answer | undefined>(undefined);
@@ -35,6 +35,8 @@
   async function load() {
     try {
       answer = await routes.readAutostorager({}, host.signal);
+      applyLanguage(answer.language);
+
       if (draft === undefined) {
         const loaded = await routes.readSettings({}, host.signal);
         draft = {

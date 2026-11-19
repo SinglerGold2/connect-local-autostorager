@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -86,6 +87,43 @@ func TestTheManifestPublishesTheCodesDefault(t *testing.T) {
 	declared := `default: "` + defaultMessage + `"`
 	if !strings.Contains(string(manifest), declared) {
 		t.Fatalf("module.yaml does not declare %s for the message setting", declared)
+	}
+}
+
+// TestTheLanguageListMatchesTheFiles keeps the offered languages and the files
+// that back them in step. A language added to ui/src/locales or ui/src/manual
+// without a line here would be unreadable from the settings page, and a tag
+// listed without files would be a promise the build cannot keep.
+func TestTheLanguageListMatchesTheFiles(t *testing.T) {
+	t.Parallel()
+
+	for _, dir := range []string{"ui/src/locales", "ui/src/manual"} {
+		files, err := filepath.Glob(filepath.Join(dir, "*.json"))
+		if err != nil {
+			t.Fatalf("list the files under %s: %v", dir, err)
+		}
+
+		shipped := make(map[string]bool, len(files))
+
+		for _, file := range files {
+			shipped[strings.TrimSuffix(filepath.Base(file), ".json")] = true
+		}
+
+		for _, tag := range languages {
+			if tag == defaultLanguage {
+				continue
+			}
+
+			if !shipped[tag] {
+				t.Errorf("the settings offer %q, but %s/%s.json is not there", tag, dir, tag)
+			}
+
+			delete(shipped, tag)
+		}
+
+		for tag := range shipped {
+			t.Errorf("%s/%s.json exists, but the settings do not offer it", dir, tag)
+		}
 	}
 }
 

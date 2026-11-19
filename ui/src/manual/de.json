@@ -38,5 +38,17 @@
   "picture2": "2. In den freigegebenen Ordner speichern.",
   "picture3": "3. Diesen Ordner hier eintragen, so wie der Server ihn sieht.",
   "picture4": "4. Die Datei erscheint unter Storage.",
-  "picture5": "5. Mit Slicerdaten und Vorschau."
+  "picture5": "5. Mit Slicerdaten und Vorschau.",
+  "linuxSample": "services:\n  prusa-connect:\n    volumes:\n      - /srv/autostorager:/incoming",
+  "hostSettingsTitle": "Die Einstellungen im Settings-Bereich der Erweiterung",
+  "hostSettings": "Der Server führt für jede Erweiterung einen Settings-Bereich. Er trägt dieselben Werte wie diese Seite und zwei mehr: language und message. Was auf der Autostorager-Seite gespeichert ist, gewinnt, weil es in der Datenbank des Moduls liegt.",
+  "hostLanguage": "language: system folgt dem Browser, oder en, de oder cs legen eine feste fest. Der Abschnitt Sprache unten erklärt es.",
+  "hostMessage": "message: die Zeile, die die eigene Route des Moduls beantwortet. Sie wird auf der Seite nicht gezeichnet; nur ändern, wenn ein Werkzeug die Route liest.",
+  "hostDefaults": "interval_seconds, storage, max_mb, move_on_success: die Vorgaben, mit denen das Modul startet. Was auf der Autostorager-Seite gespeichert ist, gewinnt.",
+  "captionSettings": "Der Settings-Bereich von Autostorager auf dem Server, mit language, message und den übrigen Vorgaben.",
+  "languageTitle": "Die Sprache",
+  "language": "Die Sprache wird auf dem Server eingestellt, nicht auf dieser Seite: Erweiterungen, Autostorager, Settings, Feld language. system bedeutet die Sprache des Browsers; en, de oder cs legen eine feste fest. Tschechisch ist cs, nicht cz, ein Ländercode wird aber angenommen.",
+  "languageRestart": "Die Wahl wird sofort gespeichert und beim Start gelesen, das Modul startet nach dem Speichern also neu. Nimm einen ruhigen Moment: ein Import, der gerade läuft, wird von diesem Neustart unterbrochen. Eine Sprache, die das Paket nicht enthält, fällt auf die Browsersprache zurück und von dort auf Englisch. Die Knöpfe oben wechseln die Sprache für diesen Besuch, ohne etwas zu speichern.",
+  "languageContribute": "Deine Sprache fehlt? Dann hilf auf GitHub mit. Kopiere locales/en.json und manual/en.json nach <tag>.json, übersetze die Werte, lass die Schlüssel stehen und stelle einen Pull Request. Hier sollte niemand eine Sprache schreiben, die er nicht spricht - eine Maschinenübersetzung liest sich wie eine. Das Tschechische ist genau das: ein Testballon, mit KI übersetzt. Ob er taugt, müssen tschechische Leser entscheiden.",
+  "languageRepo": "github.com/SinglerGold2/connect-local-autostorager"
 }

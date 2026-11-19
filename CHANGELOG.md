@@ -4,6 +4,8 @@
 
 ### Added
 
+- A language setting: `system`, `en`, `de` or `cs`. The page and the manual
+  follow it; the manual's buttons switch the language for the visit.
 - A green dot beside every import that succeeded and a red dot beside every
   import that failed, in the dashboard card's list.
 - The dashboard card says "Autostorager" when no title is set, so it names

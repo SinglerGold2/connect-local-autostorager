@@ -41,6 +41,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"sync/atomic"
 
 	"database/sql"
@@ -67,6 +68,14 @@ const (
 // code does when nobody overrides it.
 const defaultMessage = "Autostorager is serving."
 
+// defaultLanguage is the setting's value until a person picks one, and it means
+// the language the browser asks for.
+const defaultLanguage = "system"
+
+// languages are the ones a build ships a file for. "system" is the default and
+// means the language the browser asks for.
+var languages = []string{defaultLanguage, "en", "de", "cs"}
+
 // defaults are what module.yaml declares, repeated here for a host that sends
 // nothing.
 const (
@@ -82,6 +91,10 @@ const (
 // plugin.configure. A key this struct does not carry refuses the start, so a
 // typo is found before a request is.
 type Settings struct {
+	// Language is the language of the module's own pages, or "system" to follow
+	// the browser.
+	Language string `json:"language"`
+
 	// Message is the line GET /autostorager answers with.
 	Message string `json:"message"`
 
@@ -125,6 +138,12 @@ var db *sql.DB
 
 // withDefaults fills what a host that sends nothing would leave empty.
 func withDefaults(sent Settings) Settings {
+	sent.Language = normalizeLanguage(sent.Language)
+
+	if !isLanguage(sent.Language) {
+		sent.Language = defaultLanguage
+	}
+
 	if sent.Message == "" {
 		sent.Message = defaultMessage
 	}
@@ -153,7 +172,17 @@ func settings() Settings {
 		return *current
 	}
 
-	return Settings{Message: defaultMessage}
+	return Settings{Language: defaultLanguage, Message: defaultMessage}
+}
+
+// languageTag is the language of the module's own pages as the operator set
+// it, or "system" to follow the browser.
+func languageTag() string {
+	if tag := normalizeLanguage(settings().Language); isLanguage(tag) {
+		return tag
+	}
+
+	return defaultLanguage
 }
 
 // openAPI is the fragment describing the route, with every path relative to
@@ -323,6 +352,7 @@ func routes() http.Handler {
 	mux.HandleFunc("GET /autostorager", func(w http.ResponseWriter, r *http.Request) {
 		answer(w, http.StatusOK, map[string]any{
 			"message":  settings().Message,
+			"language": languageTag(),
 			"settings": settings(),
 			"recent":   recentImports(),
 			// Who the host says is calling. It is the host's answer and not a
@@ -341,6 +371,41 @@ func routes() http.Handler {
 	})
 
 	return mux
+}
+
+// normalizeLanguage turns what an operator types into a tag this build has:
+// a country code (cz), a language name, a full tag (de-DE), or the word for
+// following the browser.
+func normalizeLanguage(written string) string {
+	tag := strings.ToLower(strings.TrimSpace(written))
+
+	switch tag {
+	case "", "system", "auto", "browser":
+		return defaultLanguage
+	case "cz", "cs-cz", "cesky", "čeština", "cestina", "czech":
+		return "cs"
+	case "de-de", "de-at", "de-ch", "deutsch", "german", "ger":
+		return "de"
+	case "en-us", "en-gb", "english", "eng":
+		return "en"
+	}
+
+	if len(tag) > 2 {
+		tag = tag[:2]
+	}
+
+	return tag
+}
+
+// isLanguage answers whether a tag is one this build ships, or "system".
+func isLanguage(tag string) bool {
+	for _, known := range languages {
+		if known == tag {
+			return true
+		}
+	}
+
+	return false
 }
 
 // answer writes one JSON body, which is every route above.

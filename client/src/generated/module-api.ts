@@ -100,6 +100,7 @@ export interface operations {
                             result: string;
                             detail?: string;
                         }[];
+                        language: string;
                         principal?: string;
                     };
                 };

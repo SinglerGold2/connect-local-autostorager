@@ -273,6 +273,18 @@ this module by itself: raise `CORE_REF` in the `Makefile` on purpose, remove
 `.core`, and run the checks again. Only then does the module see the new core,
 and `require` in `module.yaml` should be raised with it.
 
+## Language
+
+The module's pages and manual follow the `language` setting in the extension's
+settings: `system` follows the browser, or pin `en`, `de` or `cs`. The manual's
+buttons switch the language for the visit. Changing the setting restarts the
+module.
+
+The texts are files. To add a language, copy `ui/src/locales/en.json` and
+`ui/src/manual/en.json` to `<tag>.json`, translate the values, keep the keys,
+and open a pull request. The Czech is machine-translated; Czech readers decide
+whether it holds up.
+
 ## Releasing
 
 A release is published from GitHub, never by hand:
