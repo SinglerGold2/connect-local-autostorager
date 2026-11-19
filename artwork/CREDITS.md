@@ -21,6 +21,7 @@ anyway. Both icons were recoloured and combined, which the credit line says.
 autostorager_github.svg  1920x1080  the GitHub banner, used in the README
 logo.svg                  512x512   the mark alone
 logo.png                  512x512   the same mark, rendered
-marketplace.png          2048x2048  the 1:1 marketplace upload, lossless, 83 KB
+marketplace.png          2048x2048  the 1:1 marketplace upload, lossless, 100 KB
+autostorager-1x1.png     2048x2048  the rendered 1:1 image, same as marketplace.png
 autostorager-1x1.svg     2048x2048  the 16:9 composition on a square canvas
 ```
