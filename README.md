@@ -273,6 +273,31 @@ this module by itself: raise `CORE_REF` in the `Makefile` on purpose, remove
 `.core`, and run the checks again. Only then does the module see the new core,
 and `require` in `module.yaml` should be raised with it.
 
+## Releasing
+
+A release is published from GitHub, never by hand:
+
+```bash
+git tag -a v0.1.0 -m "Autostorager 0.1.0"
+git push origin v0.1.0
+```
+
+Publishing that release on GitHub starts `.github/workflows/release.yml`, which
+hands the commit to the marketplace builder: it compiles every platform and the
+browser bundle from the source, signs the archive with the repository's key and
+submits it. Prusa reviews it before operators can install it.
+
+Two things have to exist in the repository for that to work:
+
+| What | Where |
+| --- | --- |
+| Secret `PRUSA_CONNECT_EXTENSION_SIGNING_KEY`, the private key in PEM | Settings, Secrets and variables, Actions |
+| Trusted publisher for `singlergold2/connect-local-autostorager` with the id `com.github.aux.singlergold2.connect-local-autostorager` | the marketplace's author console |
+
+The tag's version must equal `version:` in `module.yaml`, and the release must
+not be labeled pre-release. pnpm is pinned at 11.3.0 in `client/package.json` and
+`ui/package.json`, because the lockfiles are written by that version.
+
 ## Licence
 
 MIT.
