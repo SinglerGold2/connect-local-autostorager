@@ -53,10 +53,10 @@
   <Card>
     <CardContent>
       <div class="flex flex-col gap-3 text-sm">
-        <h3 class="font-medium">{m('whatTitle')}</h3>
+        <h3 class="font-semibold">{m('whatTitle')}</h3>
         <p>{m('what')}</p>
 
-        <h3 class="mt-2 font-medium">{m('flowTitle')}</h3>
+        <h3 class="mt-2 font-semibold">{m('flowTitle')}</h3>
         <ol class="ml-4 list-decimal">
           <li>{m('flow1')}</li>
           <li>{m('flow2')}</li>
@@ -65,26 +65,26 @@
           <li>{m('flow5')}</li>
         </ol>
 
-        <h3 class="mt-2 font-medium">{m('linuxTitle')}</h3>
+        <h3 class="mt-2 font-semibold">{m('linuxTitle')}</h3>
         <p>{m('linux')}</p>
         <pre class="bg-neutral-100 rounded overflow-x-auto p-2 text-xs">{t(
             'autostorager.manual.linuxSample',
           )}</pre>
         <p>{m('linuxPath')}</p>
 
-        <h3 class="mt-2 font-medium">{m('localTitle')}</h3>
+        <h3 class="mt-2 font-semibold">{m('localTitle')}</h3>
         <p>{m('local')}</p>
 
-        <h3 class="mt-2 font-medium">{m('pathTitle')}</h3>
+        <h3 class="mt-2 font-semibold">{m('pathTitle')}</h3>
         <p>{m('path')}</p>
 
-        <h3 class="mt-2 font-medium">{m('smbTitle')}</h3>
+        <h3 class="mt-2 font-semibold">{m('smbTitle')}</h3>
         <p>{m('smb')}</p>
 
-        <h3 class="mt-2 font-medium">{m('otherTitle')}</h3>
+        <h3 class="mt-2 font-semibold">{m('otherTitle')}</h3>
         <p>{m('other')}</p>
 
-        <h3 class="mt-2 font-medium">
+        <h3 class="mt-2 font-semibold">
           {m('settingsTitle')}
         </h3>
         <ul class="ml-4 list-disc">
@@ -95,21 +95,21 @@
           <li>{m('settingMove')}</li>
         </ul>
 
-        <h3 class="mt-2 font-medium">{m('namesTitle')}</h3>
+        <h3 class="mt-2 font-semibold">{m('namesTitle')}</h3>
         <p>{m('names')}</p>
 
-        <h3 class="mt-2 font-medium">{m('failedTitle')}</h3>
+        <h3 class="mt-2 font-semibold">{m('failedTitle')}</h3>
         <p>{m('failed')}</p>
 
-        <h3 class="mt-2 font-medium">
+        <h3 class="mt-2 font-semibold">
           {m('precedenceTitle')}
         </h3>
         <p>{m('precedence')}</p>
 
-        <h3 class="mt-2 font-medium">{m('checkTitle')}</h3>
+        <h3 class="mt-2 font-semibold">{m('checkTitle')}</h3>
         <p>{m('check')}</p>
 
-        <h3 class="mt-2 font-medium">
+        <h3 class="mt-2 font-semibold">
           {m('picturesTitle')}
         </h3>
         <div class="flex flex-col gap-4">

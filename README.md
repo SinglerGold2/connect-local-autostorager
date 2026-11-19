@@ -12,10 +12,10 @@ The extension is a normal module. Install it the way your server takes modules.
 ### Linux, server in a container
 
 ```bash
-docker cp autostorager-0.1.0.tar.gz prusa-connect-local:/tmp/
+docker cp autostorager-0.2.0.tar.gz prusa-connect-local:/tmp/
 docker exec -w /app prusa-connect-local /app/prusa_connect_local \
-  module add github.com/singlergold2/connect-local-autostorager@0.1.0 \
-  -from /tmp/autostorager-0.1.0.tar.gz -approve -database sqlite
+  module add github.com/singlergold2/connect-local-autostorager@0.2.0 \
+  -from /tmp/autostorager-0.2.0.tar.gz -approve -database sqlite
 docker restart prusa-connect-local
 ```
 
@@ -31,8 +31,8 @@ Run the command as the user that owns that data, then restart the unit.
 ```bash
 sudo systemctl stop prusa-connect
 sudo -u prusa-connect /opt/prusa-connect/prusa_connect_local module add \
-  github.com/singlergold2/connect-local-autostorager@0.1.0 \
-  -from /tmp/autostorager-0.1.0.tar.gz -approve -database sqlite
+  github.com/singlergold2/connect-local-autostorager@0.2.0 \
+  -from /tmp/autostorager-0.2.0.tar.gz -approve -database sqlite
 sudo systemctl start prusa-connect
 ```
 
@@ -49,16 +49,16 @@ server afterwards.
 
 ```bash
 cd ~/prusa-connect
-./prusa_connect_local module add github.com/singlergold2/connect-local-autostorager@0.1.0 \
-  -from ~/Downloads/autostorager-0.1.0.tar.gz -approve -database sqlite
+./prusa_connect_local module add github.com/singlergold2/connect-local-autostorager@0.2.0 \
+  -from ~/Downloads/autostorager-0.2.0.tar.gz -approve -database sqlite
 ```
 
 ### Windows
 
 ```powershell
 cd C:\prusa-connect
-.\prusa_connect_windows_amd64.exe module add github.com/singlergold2/connect-local-autostorager@0.1.0 `
-  -from C:\Users\you\Downloads\autostorager-0.1.0.tar.gz -approve -database sqlite
+.\prusa_connect_windows_amd64.exe module add github.com/singlergold2/connect-local-autostorager@0.2.0 `
+  -from C:\Users\you\Downloads\autostorager-0.2.0.tar.gz -approve -database sqlite
 ```
 
 Then restart the server. The module lands under
@@ -68,8 +68,8 @@ Then restart the server. The module lands under
 
 ```bash
 cd ~/prusa-connect
-./prusa_connect_macos_arm64 module add github.com/singlergold2/connect-local-autostorager@0.1.0 \
-  -from ~/Downloads/autostorager-0.1.0.tar.gz -approve -database sqlite
+./prusa_connect_macos_arm64 module add github.com/singlergold2/connect-local-autostorager@0.2.0 \
+  -from ~/Downloads/autostorager-0.2.0.tar.gz -approve -database sqlite
 ```
 
 Then restart the server. If macOS refuses a downloaded file, clear the
@@ -278,8 +278,8 @@ and `require` in `module.yaml` should be raised with it.
 A release is published from GitHub, never by hand:
 
 ```bash
-git tag -a v0.1.0 -m "Autostorager 0.1.0"
-git push origin v0.1.0
+git tag -a v0.2.0 -m "Autostorager 0.2.0"
+git push origin v0.2.0
 ```
 
 Publishing that release on GitHub starts `.github/workflows/release.yml`, which
@@ -338,6 +338,19 @@ nothing about which of the two it is. The folder name does: a version built
 locally also carries `build/`.
  pnpm is pinned at 11.3.0 in `client/package.json` and
 `ui/package.json`, because the lockfiles are written by that version.
+
+## Artwork
+
+`artwork/marketplace.png` and the 16:9 banner combine two icons from SVG Repo:
+
+| Icon | Author | Licence |
+| --- | --- | --- |
+| file-horizontal | Dazzle UI | [CC Attribution 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| hand-holding | jtblabs | [MIT](https://www.svgrepo.com/page/licensing/#MIT) |
+
+The project code is MIT; the icons keep their own licences. `file-horizontal`
+requires attribution, so Dazzle UI is named here and in the image's credit
+line. `artwork/CREDITS.md` carries the source links.
 
 ## Licence
 

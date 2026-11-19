@@ -35,7 +35,7 @@ CHECKOUT=${CHECKOUT:-$PWD/.core}
 
 NAME=autostorager
 MODULE=github.com/singlergold2/connect-local-autostorager
-VERSION=0.1.0
+VERSION=0.2.0
 
 # Everything this writes goes under the checkout's bin/, which is ignored, and
 # that is where a build artefact belongs. The demo keeps its records in demo/

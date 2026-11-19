@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "autostorager",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "The routes autostorager serves. Every path is relative to the mount the host assigns, and the host serves this document rebased under it at <mount>/openapi.json."
   },
   "paths": {

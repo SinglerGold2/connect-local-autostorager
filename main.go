@@ -58,7 +58,7 @@ import (
 // manifest's, and the host holds the two to each other.
 const (
 	name    = "autostorager"
-	release = extension.Version("0.1.0")
+	release = extension.Version("0.2.0")
 )
 
 // defaultMessage is the line the route answers with when the operator sets

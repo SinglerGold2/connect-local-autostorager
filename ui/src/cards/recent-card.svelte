@@ -13,6 +13,10 @@
   const t = host.t;
   const routes = bind(host.client);
 
+  const heading = $derived(
+    title.trim() === '' ? t('autostorager.card.heading') : title,
+  );
+
   let answer = $state<Answer | undefined>(undefined);
 
   $effect(() => {
@@ -39,7 +43,7 @@
 </script>
 
 <div class="flex h-full flex-col gap-2">
-  <h3 class="font-medium">{title}</h3>
+  <h3 class="text-base font-semibold">{heading}</h3>
 
   {#if lines.length === 0}
     <p class="text-neutral-500 text-sm">{t('autostorager.card.empty')}</p>
@@ -47,6 +51,15 @@
     <ul class="flex flex-col gap-1 text-sm">
       {#each lines as line (line.at + line.source)}
         <li class="flex items-center gap-2">
+          <span
+            class="size-2 shrink-0 rounded-full"
+            class:bg-state-done-edge={line.result === 'imported'}
+            class:bg-state-fault-edge={line.result !== 'imported'}
+            role="img"
+            aria-label={line.result === 'imported'
+              ? t('autostorager.card.imported')
+              : t('autostorager.card.failed')}
+          ></span>
           <span class="truncate">{nameOf(line.source)}</span>
           <span class="text-neutral-500 ml-auto shrink-0"
             >{line.at.slice(11, 16)}</span

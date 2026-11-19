@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.0 - 2026-11-19
+
+### Added
+
+- A green dot beside every import that succeeded and a red dot beside every
+  import that failed, in the dashboard card's list.
+- The dashboard card says "Autostorager" when no title is set, so it names
+  itself instead of showing an empty heading.
+
+### Changed
+
+- The manual's section headings are semibold, like the headings in the rest of
+  the app.
+
 ## 0.1.0 - 2026-11-18
 
 ### Added
