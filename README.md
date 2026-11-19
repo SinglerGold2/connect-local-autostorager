@@ -1,4 +1,4 @@
-# <img src="artwork/icon.svg" width="40" align="center" alt=""> Autostorager
+# <img src="artwork/logo.svg" width="40" align="center" alt=""> Autostorager
 
 A Prusa Connect Local extension that watches up to four folders and hands every
 print file it finds to the server's storage. The file arrives there like a
@@ -341,7 +341,8 @@ locally also carries `build/`.
 
 ## Artwork
 
-`artwork/marketplace.png` and the 16:9 banner combine two icons from SVG Repo:
+`artwork/logo.svg`, `artwork/marketplace.png` and the 16:9 banner combine two
+icons from SVG Repo:
 
 | Icon | Author | Licence |
 | --- | --- | --- |

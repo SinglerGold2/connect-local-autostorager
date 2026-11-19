@@ -1,7 +1,8 @@
 # Artwork credits
 
-`autostorager-1x1.svg` and `marketplace.png` combine two icons from SVG Repo.
-`marketplace.png` is the square upload for the marketplace listing.
+`logo.svg`, `autostorager-1x1.svg` and `marketplace.png` combine two icons from
+SVG Repo. `marketplace.png` is the square upload for the marketplace listing;
+`logo.svg` is the mark beside the README title.
 
 | Icon | Source | Licence | Author |
 | --- | --- | --- | --- |
@@ -15,6 +16,8 @@ anyway. Both icons were recoloured and combined, which the credit line says.
 ## Files
 
 ```
+logo.svg                512x512   the mark beside the README title
+logo.png                512x512   the same mark, rendered
 marketplace.png        2048x2048  the square upload, lossless, 83 KB
 autostorager-1x1.svg   2048x2048  the 16:9 composition on a square canvas
 ```
