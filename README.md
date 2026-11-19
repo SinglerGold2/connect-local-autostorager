@@ -307,6 +307,7 @@ next run. One version, one folder:
 <version>/
   autostorager-<version>.tar.gz
   autostorager-<version>-windows-amd64.zip
+  RELEASE-<version>.md      the release notes, the text of the GitHub page
   build/                    the unpacked release directory, as it was built
 ```
 
