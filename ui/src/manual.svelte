@@ -87,6 +87,9 @@
           <li>{m('flow5')}</li>
         </ol>
 
+        <h3 class="mt-2 font-semibold">{m('filesTitle')}</h3>
+        <p>{m('files')}</p>
+
         <h3 class="mt-2 font-semibold">{m('linuxTitle')}</h3>
         <p>{m('linux')}</p>
         <pre class="bg-neutral-100 rounded overflow-x-auto p-2 text-xs">{m(

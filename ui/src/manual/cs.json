@@ -3,7 +3,7 @@
   "whatTitle": "Co tento modul dělá",
   "what": "Sleduje jednu složku a předává každý soubor G-code nebo bgcode, který se v ní objeví, do úložiště serveru. Soubor se tam zpracuje jako ruční nahrání: server načte údaje ze sliceru, vykreslí náhled a zařadí jej do Úložiště. Modul nikdy nezapisuje přímo do úložiště; používá stejné API jako nahrání. Berou se pouze běžné soubory; symbolický odkaz se přeskakuje.",
   "flowTitle": "Co se se souborem stane",
-  "flow1": "Složka se čte každých několik sekund a přebírají se pouze soubory .gcode a .bgcode.",
+  "flow1": "Složka se čte každých několik sekund a berou se pouze běžné soubory .gcode a .bgcode.",
   "flow2": "Soubor se přečte až poté, co se jeho velikost dvakrát nezměnila, takže soubor, který slicer stále zapisuje, zůstane nedotčen.",
   "flow3": "Modul požádá úložiště o volný název a pokud je název obsazen, přidá -1, -2 a tak dále.",
   "flow4": "Bajty se zkopírují do úložiště. Teprve po potvrzení kopie se zdroj přesune do successful/.",
@@ -60,5 +60,7 @@
   "rightsNote": "Pro admin práva použijte admin místo operator. id je v Settings > People nebo v odpovědi POST /api/v1/auth/accounts. Volání potřebuje relaci administrátora.",
   "rightsSystems": "První účet vzniká na setup stránce z kódu v logu serveru: docker logs v kontejneru, journalctl -u u služby, jinak konzole v macOS a Windows. Role jsou na Linuxu, macOS a Windows stejné. Leží v databázi serveru, ne v uživatelských účtech operačního systému. Ve Windows může server kvůli portům nebo složkám běžet jako Administrátor; tím se ale účet v prohlížeči nestane administrátorem, to dělá jen účet PCL a jeho role. Na Linuxu a macOS server obvykle běží jako servisní uživatel; sledovaná složka pro něj musí být čitelná a zapisovatelná.",
   "rightsImportant": "DŮLEŽITÉ",
-  "beforeTitle": "Než začnete"
+  "beforeTitle": "Než začnete",
+  "filesTitle": "Které soubory se berou",
+  "files": "Berou se pouze běžné soubory. Watcher čte nejvyšší úroveň každé sledované složky a neprochází podsložky. Symbolický odkaz se přeskakuje, i když jeho název končí na .gcode nebo .bgcode: zůstane ležet a není importován, přesouván ani následován. Odkaz může ukazovat na jakýkoli soubor, který server umí číst, proto ho watcher nikdy nenásleduje. Totéž platí pro adresáře, zařízení, roury a sokety. Pokud se má soubor tisknout, nahraďte odkaz souborem samotným."
 }

@@ -3,7 +3,7 @@
   "whatTitle": "Was dieses Modul tut",
   "what": "Es beobachtet einen Ordner und übergibt jede G-code- oder bgcode-Datei, die dort auftaucht, an den Storage des Servers. Dort wird sie wie ein manueller Upload behandelt: Der Server liest die Slicer-Daten, zeichnet die Vorschau und listet die Datei unter Storage. Das Modul schreibt nie direkt in den Storage, sondern geht denselben Weg wie ein Upload. Es werden nur reguläre Dateien genommen; ein symbolischer Link wird übersprungen.",
   "flowTitle": "Was mit einer Datei passiert",
-  "flow1": "Jeder Ordner wird alle paar Sekunden gelesen. Nur .gcode und .bgcode werden genommen.",
+  "flow1": "Der Ordner wird alle paar Sekunden gelesen, und nur reguläre .gcode- und .bgcode-Dateien werden genommen.",
   "flow2": "Eine Datei wird erst gelesen, wenn ihre Größe über zwei Prüfungen gleich geblieben ist; eine Datei, die der Slicer noch schreibt, bleibt unangetastet.",
   "flow3": "Das Modul fragt den Storage nach einem freien Namen und hängt -1, -2 und so weiter an, wenn der Name belegt ist.",
   "flow4": "Die Bytes werden in den Storage kopiert. Erst nachdem dieser Kopiervorgang abgeschlossen ist, wandert die Quelle nach successful/.",
@@ -60,5 +60,7 @@
   "rightsNote": "Für Admin-Rechte admin statt operator setzen. Die id steht in Settings > People oder in der Antwort von POST /api/v1/auth/accounts. Der Aufruf braucht die Sitzung eines Administrators.",
   "rightsSystems": "Das erste Konto entsteht auf der Setup-Seite mit dem Code aus dem Server-Log: docker logs im Container, journalctl -u beim Dienst, sonst die Konsole unter macOS und Windows. Die Rollen sind auf Linux, macOS und Windows gleich. Sie liegen in der Datenbank des Servers, nicht in den Benutzerkonten des Betriebssystems. Unter Windows muss der Server für Ports oder Ordner vielleicht als Administrator laufen; das macht das Browser-Konto aber nicht zum Admin, das tun nur das PCL-Konto und seine Rolle. Unter Linux und macOS läuft der Server meist als Dienstbenutzer; der überwachte Ordner muss für ihn lesbar und schreibbar sein.",
   "rightsImportant": "WICHTIG",
-  "beforeTitle": "Bevor du beginnst"
+  "beforeTitle": "Bevor du beginnst",
+  "filesTitle": "Welche Dateien genommen werden",
+  "files": "Es werden nur reguläre Dateien genommen. Der Watcher liest die oberste Ebene jedes überwachten Ordners und durchsucht keine Unterordner. Ein symbolischer Link wird übersprungen, auch wenn sein Name auf .gcode oder .bgcode endet: Er bleibt liegen und wird weder importiert noch verschoben noch verfolgt. Ein Link kann auf jede Datei zeigen, die der Server lesen kann; der Watcher folgt ihm nie. Dasselbe gilt für Verzeichnisse, Geräte, Pipes und Sockets. Ersetze den Link durch die Datei selbst, wenn sie gedruckt werden soll."
 }

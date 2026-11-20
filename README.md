@@ -262,8 +262,8 @@ restart.
 
 ## What happens to a file
 
-1. Each supervised folder is read every few seconds. Only `.gcode` and `.bgcode`
-   files are taken.
+1. Each supervised folder is read every few seconds. Only regular `.gcode` and
+   `.bgcode` files are taken.
 2. A file is read once its size has held still across two checks, so a file a
    slicer is still writing is left alone.
 3. The module asks the storage for a free name and appends `-1`, `-2` and so on
@@ -272,6 +272,13 @@ restart.
    Only after that copy is committed is the source moved into `successful/`.
 5. A file that cannot be imported is moved into `failed/`, and a text file
    beside it names the step, the reason, the time and the path.
+
+The watcher takes only regular files. Symbolic links, directories, devices,
+pipes and sockets are skipped even when their name ends in `.gcode` or
+`.bgcode`. A link stays where it is; it is not imported, moved or followed. A
+link can point at any file the server can read, so the watcher never follows
+one. Replace the link with the file itself if it should be printed. Subfolders
+are not searched.
 
 ## Checking it works
 
