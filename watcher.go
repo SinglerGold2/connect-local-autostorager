@@ -27,6 +27,10 @@ const sizeSettle = 2
 // errNoFile is what the storage answers for a name it does not hold.
 var errNoFile = storageapi.ErrNoFile
 
+// errNotRegular is a path that is not a regular file: a directory, a device,
+// a pipe, a socket or a symbolic link.
+var errNotRegular = errors.New("not a regular file")
+
 // Import is one line of the page's list and of the card.
 type Import struct {
 	At     string `json:"at"`
@@ -68,6 +72,22 @@ func allowed(name string) bool {
 	lower := strings.ToLower(name)
 
 	return strings.HasSuffix(lower, ".gcode") || strings.HasSuffix(lower, ".bgcode")
+}
+
+// regularFile returns the lstat of path when it is a regular file. A symbolic
+// link is reported as itself, never as the file it points at, so a link that
+// carries a .gcode name cannot make the module read a database or a config.
+func regularFile(path string) (os.FileInfo, error) {
+	info, err := os.Lstat(path)
+	if err != nil {
+		return nil, err
+	}
+
+	if !info.Mode().IsRegular() {
+		return nil, errNotRegular
+	}
+
+	return info, nil
 }
 
 // startWatcher stops every running loop and starts one per folder.
@@ -135,8 +155,10 @@ func scan(ctx context.Context, s Settings, folder string, sizes map[string]int64
 			continue
 		}
 
+		// Info is an lstat: for a symbolic link it reports the link, not the
+		// file it points at, so a link with a print-file name is skipped.
 		info, infoErr := entry.Info()
-		if infoErr != nil {
+		if infoErr != nil || !info.Mode().IsRegular() {
 			continue
 		}
 
@@ -165,8 +187,14 @@ func scan(ctx context.Context, s Settings, folder string, sizes map[string]int64
 func importOne(ctx context.Context, s Settings, folder, path string) {
 	name := filepath.Base(path)
 
-	info, err := os.Stat(path)
+	info, err := regularFile(path)
 	if err != nil {
+		if errors.Is(err, errNotRegular) {
+			note(Import{At: now(), Folder: folder, Source: path, Result: "error", Detail: "skipped: not a regular file"})
+
+			return
+		}
+
 		fail(s, folder, path, name, "reading the file", err)
 
 		return
@@ -186,14 +214,47 @@ func importOne(ctx context.Context, s Settings, folder, path string) {
 		return
 	}
 
-	body, err := os.Open(path)
+	body, err := openRegular(path)
 	if err != nil {
+		// A file swapped for a symbolic link between the scan and the open is
+		// not moved into failed/, which would copy its target across devices.
+		if _, statErr := regularFile(path); statErr != nil {
+			note(Import{At: now(), Folder: folder, Source: path, Result: "error", Detail: "skipped: not a regular file"})
+
+			return
+		}
+
 		fail(s, folder, path, name, "opening the file", err)
 
 		return
 	}
 
-	written, err := store.Write(ctx, storageapi.WriteParams{Storage: s.Storage, Path: target, Size: info.Size()}, body)
+	// The descriptor is what is read, so its mode and size decide, not the
+	// directory entry that may have been swapped since the scan.
+	opened, err := body.Stat()
+	if err != nil {
+		_ = body.Close()
+		fail(s, folder, path, name, "reading the opened file", err)
+
+		return
+	}
+
+	if !opened.Mode().IsRegular() {
+		_ = body.Close()
+		note(Import{At: now(), Folder: folder, Source: path, Result: "error", Detail: "skipped: not a regular file"})
+
+		return
+	}
+
+	if opened.Size() > int64(s.MaxMB)<<20 {
+		_ = body.Close()
+		fail(s, folder, path, name, "the file is larger than the limit",
+			fmt.Errorf("%d MB is more than %d MB", opened.Size()>>20, s.MaxMB))
+
+		return
+	}
+
+	written, err := store.Write(ctx, storageapi.WriteParams{Storage: s.Storage, Path: target, Size: opened.Size()}, body)
 	_ = body.Close()
 
 	if err != nil {
@@ -242,6 +303,14 @@ func freeName(ctx context.Context, storage, name string) (string, error) {
 // fail moves a source it could not import into failed/ and writes what went
 // wrong beside it.
 func fail(s Settings, folder, path, name, step string, cause error) {
+	// fail runs after a read or an open; never move a non-regular path, because
+	// the cross-device branch of moveTo would copy the link's target.
+	if info, statErr := os.Lstat(path); statErr == nil && !info.Mode().IsRegular() {
+		note(Import{At: now(), Folder: folder, Source: path, Result: "error", Detail: step + ": not a regular file"})
+
+		return
+	}
+
 	view.mu.Lock()
 	view.failed++
 	view.mu.Unlock()
@@ -261,6 +330,15 @@ func fail(s Settings, folder, path, name, step string, cause error) {
 
 // moveTo moves a file, copying when the two paths are on different devices.
 func moveTo(from, to string) error {
+	info, err := os.Lstat(from)
+	if err != nil {
+		return err
+	}
+
+	if !info.Mode().IsRegular() {
+		return errNotRegular
+	}
+
 	if err := os.MkdirAll(filepath.Dir(to), 0o755); err != nil {
 		return err
 	}
@@ -269,7 +347,7 @@ func moveTo(from, to string) error {
 		return nil
 	}
 
-	source, err := os.Open(from)
+	source, err := openRegular(from)
 	if err != nil {
 		return err
 	}

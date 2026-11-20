@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.2 - 2026-11-20
+
+### Fixed
+
+- The watcher takes only regular files. A symbolic link in a watched folder is
+  skipped at the scan and checked again on the opened descriptor, so a link
+  with a print-file name cannot make the module import a database, a
+  configuration file or any other file the server process can read into
+  storage.
+
 ## 0.2.1 - 2026-11-19
 
 ### Fixed

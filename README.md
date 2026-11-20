@@ -3,7 +3,8 @@
 A Prusa Connect Local extension that watches up to four folders and hands every
 print file it finds to the server's storage. The file arrives there like a
 manual upload: with its preview, its slicer details and its print time. Nothing
-is moved or deleted before the copy is complete.
+is moved or deleted before the copy is complete. Only regular files are taken;
+a symbolic link in a watched folder is skipped.
 
 ## Users and rights
 
@@ -32,10 +33,10 @@ The extension is a normal module. Install it the way your server takes modules.
 ### Linux, server in a container
 
 ```bash
-docker cp autostorager-0.2.1.tar.gz prusa-connect-local:/tmp/
+docker cp autostorager-0.2.2.tar.gz prusa-connect-local:/tmp/
 docker exec -w /app prusa-connect-local /app/prusa_connect_local \
-  module add github.com/singlergold2/connect-local-autostorager@0.2.1 \
-  -from /tmp/autostorager-0.2.1.tar.gz -approve -database sqlite
+  module add github.com/singlergold2/connect-local-autostorager@0.2.2 \
+  -from /tmp/autostorager-0.2.2.tar.gz -approve -database sqlite
 docker restart prusa-connect-local
 ```
 
@@ -51,8 +52,8 @@ Run the command as the user that owns that data, then restart the unit.
 ```bash
 sudo systemctl stop prusa-connect
 sudo -u prusa-connect /opt/prusa-connect/prusa_connect_local module add \
-  github.com/singlergold2/connect-local-autostorager@0.2.1 \
-  -from /tmp/autostorager-0.2.1.tar.gz -approve -database sqlite
+  github.com/singlergold2/connect-local-autostorager@0.2.2 \
+  -from /tmp/autostorager-0.2.2.tar.gz -approve -database sqlite
 sudo systemctl start prusa-connect
 ```
 
@@ -69,16 +70,16 @@ server afterwards.
 
 ```bash
 cd ~/prusa-connect
-./prusa_connect_local module add github.com/singlergold2/connect-local-autostorager@0.2.1 \
-  -from ~/Downloads/autostorager-0.2.1.tar.gz -approve -database sqlite
+./prusa_connect_local module add github.com/singlergold2/connect-local-autostorager@0.2.2 \
+  -from ~/Downloads/autostorager-0.2.2.tar.gz -approve -database sqlite
 ```
 
 ### Windows
 
 ```powershell
 cd C:\prusa-connect
-.\prusa_connect_windows_amd64.exe module add github.com/singlergold2/connect-local-autostorager@0.2.1 `
-  -from C:\Users\you\Downloads\autostorager-0.2.1.tar.gz -approve -database sqlite
+.\prusa_connect_windows_amd64.exe module add github.com/singlergold2/connect-local-autostorager@0.2.2 `
+  -from C:\Users\you\Downloads\autostorager-0.2.2.tar.gz -approve -database sqlite
 ```
 
 Then restart the server. The module lands under
@@ -88,8 +89,8 @@ Then restart the server. The module lands under
 
 ```bash
 cd ~/prusa-connect
-./prusa_connect_macos_arm64 module add github.com/singlergold2/connect-local-autostorager@0.2.1 \
-  -from ~/Downloads/autostorager-0.2.1.tar.gz -approve -database sqlite
+./prusa_connect_macos_arm64 module add github.com/singlergold2/connect-local-autostorager@0.2.2 \
+  -from ~/Downloads/autostorager-0.2.2.tar.gz -approve -database sqlite
 ```
 
 Then restart the server. If macOS refuses a downloaded file, clear the
@@ -310,8 +311,8 @@ whether it holds up.
 A release is published from GitHub, never by hand:
 
 ```bash
-git tag -a v0.2.1 -m "Autostorager 0.2.1"
-git push origin v0.2.1
+git tag -a v0.2.2 -m "Autostorager 0.2.2"
+git push origin v0.2.2
 ```
 
 Publishing that release on GitHub starts `.github/workflows/release.yml`, which
