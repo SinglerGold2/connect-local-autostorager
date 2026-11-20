@@ -273,6 +273,8 @@ restart.
 5. A file that cannot be imported is moved into `failed/`, and a text file
    beside it names the step, the reason, the time and the path.
 
+## Which files are taken
+
 The watcher takes only regular files. Symbolic links, directories, devices,
 pipes and sockets are skipped even when their name ends in `.gcode` or
 `.bgcode`. A link stays where it is; it is not imported, moved or followed. A
