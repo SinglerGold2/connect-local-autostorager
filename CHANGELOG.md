@@ -2,67 +2,70 @@
 
 ## 0.2.2 - 2026-11-20
 
-### Fixed
+The first public release.
 
-- The watcher takes only regular files. A symbolic link in a watched folder is
-  skipped at the scan and checked again on the opened descriptor, so a link
-  with a print-file name cannot make the module import a database, a
-  configuration file or any other file the server process can read into
-  storage.
+### Watches folders
 
-## 0.2.1 - 2026-11-19
+- Up to four supervised directories, each added with **+ New supervised
+  directory**.
+- Each folder has its own `successful/` and `failed/`.
+- The folder is read every few seconds; a file is taken only after its size has
+  held still across two checks, so a slicer still writing it is left alone.
+- Only regular `.gcode` and `.bgcode` files at the top level are taken.
+  Subfolders are not searched. Symbolic links, directories, devices, pipes and
+  sockets are skipped; a link stays where it is and is never followed.
+- A larger file than the size limit goes to `failed/` with the reason.
 
-### Fixed
+### Imports
 
-- `PUT /settings` now asks the host for `operate_resource` on the module before
-  it reads the request. A read-only signed-in user can no longer change the
-  watched folders, the interval, the storage, the size limit or the move
-  setting.
-- The compiled `connect-local-autostorager` binary is gone from the
-  repository, and `.gitignore` keeps it out.
-- The manual's GitHub link is declared under `egress` in `module.yaml`, so the
-  marketplace's egress check passes.
+- The file goes through the storage API, so it appears with its preview and
+  slicer details exactly as a manual upload would.
+- A name already taken is never overwritten; the module appends `-1`, `-2` and
+  so on.
+- Only after the copy is committed is the source moved into `successful/`.
+- A file that cannot be imported goes to `failed/`, with a text file beside it
+  naming the step, the reason, the time and the path.
+- The source is moved only if **Move on success** is on.
 
-### Notes
+### Dashboard card
 
-- 0.2.1 carries the 0.2.0 language system, card and manual changes. The 0.2.0
-  submission was rejected before publication; 0.2.1 replaces it.
+- A card lists the last imports with a green dot for a committed import and a
+  red dot for a failure, each with an accessible label.
+- The card says "Autostorager" when no title is set.
 
-## 0.2.0 - 2026-11-19
+### Three languages
 
-### Added
+- English, German and Czech for the page and the manual.
+- `language` on the extension settings accepts `system`, `en`, `de` or `cs`.
+  `system` follows the browser.
+- Changing the setting restarts the module; the manual's EN, DE and CZ buttons
+  switch the language for the visit.
 
-- A language setting: `system`, `en`, `de` or `cs`. The page and the manual
-  follow it; the manual's buttons switch the language for the visit.
-- A green dot beside every import that succeeded and a red dot beside every
-  import that failed, in the dashboard card's list.
-- The dashboard card says "Autostorager" when no title is set, so it names
-  itself instead of showing an empty heading.
+### Users and rights
 
-### Changed
+- The manual and the README explain the PCL accounts and the `viewer`,
+  `operator` and `admin` roles, the grant on `org:local`, and the difference
+  between OS admin and PCL admin on Linux, macOS and Windows.
+- The manual opens with this block as IMPORTANT.
+- The page's Save takes `operate_resource` on `resource_kind:sink`; a
+  read-only viewer can see the page but cannot change it.
 
-- The manual's section headings are semibold, like the headings in the rest of
-  the app.
+### The manual
 
-## 0.1.0 - 2026-11-18
+- Settings, watched folders, interval, storage, size limit, moving the source,
+  the language choice, the rights and the file rules, in the manual.
 
-### Added
+### Security
 
-- A folder watcher: up to four supervised directories, each added with
-  **[+] New supervised directory** and each with its own `successful/` and
-  `failed/`.
-- An import that goes through the storage API, so a file appears with its
-  preview and slicer details exactly as a manual upload would. A name already
-  taken is never overwritten; the module appends `-1`, `-2` and so on.
-- A failure file beside every file that could not be imported, naming the step,
-  the reason, the time and the path.
-- A settings page for the folders, the check interval, the storage, the size
-  limit and whether the source is moved after a commit.
-- A manual page, and a dashboard card listing the last five imports.
+- The watcher takes only regular files. A symbolic link is skipped at the scan,
+  opened without following it where the platform allows, and checked again on
+  the opened descriptor before it is read.
+- A non-regular source is never moved into `successful/` or `failed/`.
+- Tests cover the scan, the open and the move with a symbolic link, and keep a
+  regular `.gcode` import as the counter-check.
 
-### Notes
+## Pre-release history
 
-- The module asks for `read_storage` and `write_storage`, and for a database of
-  its own, which keeps the settings across a restart.
-- A folder on the host of a containerized server has to be mounted into the
-  container first; the setting is the path inside the container.
+Earlier 0.1.0 and 0.2.x builds were internal pre-releases and were never
+published. Their tags remain in the repository; 0.2.2 is the first public
+release.
