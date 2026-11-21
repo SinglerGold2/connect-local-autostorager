@@ -33,10 +33,10 @@ The extension is a normal module. Install it the way your server takes modules.
 ### Linux, server in a container
 
 ```bash
-docker cp autostorager-0.2.2.tar.gz prusa-connect-local:/tmp/
+docker cp autostorager-0.2.3.tar.gz prusa-connect-local:/tmp/
 docker exec -w /app prusa-connect-local /app/prusa_connect_local \
-  module add github.com/singlergold2/connect-local-autostorager@0.2.2 \
-  -from /tmp/autostorager-0.2.2.tar.gz -approve -database sqlite
+  module add github.com/singlergold2/connect-local-autostorager@0.2.3 \
+  -from /tmp/autostorager-0.2.3.tar.gz -approve -database sqlite
 docker restart prusa-connect-local
 ```
 
@@ -52,8 +52,8 @@ Run the command as the user that owns that data, then restart the unit.
 ```bash
 sudo systemctl stop prusa-connect
 sudo -u prusa-connect /opt/prusa-connect/prusa_connect_local module add \
-  github.com/singlergold2/connect-local-autostorager@0.2.2 \
-  -from /tmp/autostorager-0.2.2.tar.gz -approve -database sqlite
+  github.com/singlergold2/connect-local-autostorager@0.2.3 \
+  -from /tmp/autostorager-0.2.3.tar.gz -approve -database sqlite
 sudo systemctl start prusa-connect
 ```
 
@@ -70,16 +70,16 @@ server afterwards.
 
 ```bash
 cd ~/prusa-connect
-./prusa_connect_local module add github.com/singlergold2/connect-local-autostorager@0.2.2 \
-  -from ~/Downloads/autostorager-0.2.2.tar.gz -approve -database sqlite
+./prusa_connect_local module add github.com/singlergold2/connect-local-autostorager@0.2.3 \
+  -from ~/Downloads/autostorager-0.2.3.tar.gz -approve -database sqlite
 ```
 
 ### Windows
 
 ```powershell
 cd C:\prusa-connect
-.\prusa_connect_windows_amd64.exe module add github.com/singlergold2/connect-local-autostorager@0.2.2 `
-  -from C:\Users\you\Downloads\autostorager-0.2.2.tar.gz -approve -database sqlite
+.\prusa_connect_windows_amd64.exe module add github.com/singlergold2/connect-local-autostorager@0.2.3 `
+  -from C:\Users\you\Downloads\autostorager-0.2.3.tar.gz -approve -database sqlite
 ```
 
 Then restart the server. The module lands under
@@ -89,8 +89,8 @@ Then restart the server. The module lands under
 
 ```bash
 cd ~/prusa-connect
-./prusa_connect_macos_arm64 module add github.com/singlergold2/connect-local-autostorager@0.2.2 \
-  -from ~/Downloads/autostorager-0.2.2.tar.gz -approve -database sqlite
+./prusa_connect_macos_arm64 module add github.com/singlergold2/connect-local-autostorager@0.2.3 \
+  -from ~/Downloads/autostorager-0.2.3.tar.gz -approve -database sqlite
 ```
 
 Then restart the server. If macOS refuses a downloaded file, clear the
@@ -282,6 +282,11 @@ link can point at any file the server can read, so the watcher never follows
 one. Replace the link with the file itself if it should be printed. Subfolders
 are not searched.
 
+The watcher never leaves the watched folder. `successful/` and `failed/` must
+be real directories inside it; a link that points outside is refused. A
+failure report is created new and is never written through an existing file or
+link.
+
 ## Checking it works
 
 Drop a small `.gcode` into a supervised folder. Within about one interval it
@@ -320,8 +325,8 @@ whether it holds up.
 A release is published from GitHub, never by hand:
 
 ```bash
-git tag -a v0.2.2 -m "Autostorager 0.2.2"
-git push origin v0.2.2
+git tag -a v0.2.3 -m "Autostorager 0.2.3"
+git push origin v0.2.3
 ```
 
 Publishing that release on GitHub starts `.github/workflows/release.yml`, which

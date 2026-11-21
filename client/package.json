@@ -1,6 +1,6 @@
 {
   "name": "autostorager-client",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A typed client for the routes of module com.github.aux.singlergold2.connect-local-autostorager, generated from its OpenAPI fragment. It binds onto a @prusa/connect client.",
   "type": "module",
   "sideEffects": false,

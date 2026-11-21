@@ -62,5 +62,5 @@
   "rightsImportant": "DŮLEŽITÉ",
   "beforeTitle": "Než začnete",
   "filesTitle": "Které soubory se berou",
-  "files": "Berou se pouze běžné soubory. Watcher čte nejvyšší úroveň každé sledované složky a neprochází podsložky. Symbolický odkaz se přeskakuje, i když jeho název končí na .gcode nebo .bgcode: zůstane ležet a není importován, přesouván ani následován. Odkaz může ukazovat na jakýkoli soubor, který server umí číst, proto ho watcher nikdy nenásleduje. Totéž platí pro adresáře, zařízení, roury a sokety. Pokud se má soubor tisknout, nahraďte odkaz souborem samotným."
+  "files": "Berou se pouze běžné soubory. Watcher čte nejvyšší úroveň každé sledované složky a neprochází podsložky. Symbolický odkaz se přeskakuje, i když jeho název končí na .gcode nebo .bgcode: zůstane ležet a není importován, přesouván ani následován. Odkaz může ukazovat na jakýkoli soubor, který server umí číst, proto ho watcher nikdy nenásleduje. Totéž platí pro adresáře, zařízení, roury a sokety. Pokud se má soubor tisknout, nahraďte odkaz souborem samotným. Watcher nikdy neopustí sledovanou složku. Pokud je successful/ nebo failed/ odkaz mimo ni, přesun se odmítne. Protokol o chybě se vytváří nový a nikdy se nezapisuje přes existující soubor nebo odkaz."
 }

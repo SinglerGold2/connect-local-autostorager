@@ -74,11 +74,11 @@ func allowed(name string) bool {
 	return strings.HasSuffix(lower, ".gcode") || strings.HasSuffix(lower, ".bgcode")
 }
 
-// regularFile returns the lstat of path when it is a regular file. A symbolic
-// link is reported as itself, never as the file it points at, so a link that
-// carries a .gcode name cannot make the module read a database or a config.
-func regularFile(path string) (os.FileInfo, error) {
-	info, err := os.Lstat(path)
+// regularFile returns the lstat of name when it is a regular file. The root
+// makes every lookup relative to the watched folder; a symbolic link is
+// reported as itself, never as the file it points at.
+func regularFile(root *os.Root, name string) (os.FileInfo, error) {
+	info, err := root.Lstat(name)
 	if err != nil {
 		return nil, err
 	}
@@ -134,9 +134,27 @@ func loop(ctx context.Context, s Settings, folder string) {
 	}
 }
 
-// scan reads one folder once and imports what is ready.
+// scan reads one folder once and imports what is ready. Every path below the
+// folder goes through one os.Root, so no operation can leave it.
 func scan(ctx context.Context, s Settings, folder string, sizes map[string]int64, stable map[string]int) {
-	entries, err := os.ReadDir(folder)
+	root, err := os.OpenRoot(folder)
+	if err != nil {
+		note(Import{At: now(), Folder: folder, Source: folder, Result: "error", Detail: err.Error()})
+
+		return
+	}
+	defer func() { _ = root.Close() }()
+
+	dir, err := root.Open(".")
+	if err != nil {
+		note(Import{At: now(), Folder: folder, Source: folder, Result: "error", Detail: err.Error()})
+
+		return
+	}
+
+	entries, err := dir.ReadDir(-1)
+	_ = dir.Close()
+
 	if err != nil {
 		note(Import{At: now(), Folder: folder, Source: folder, Result: "error", Detail: err.Error()})
 
@@ -155,14 +173,15 @@ func scan(ctx context.Context, s Settings, folder string, sizes map[string]int64
 			continue
 		}
 
-		// Info is an lstat: for a symbolic link it reports the link, not the
-		// file it points at, so a link with a print-file name is skipped.
-		info, infoErr := entry.Info()
+		name := entry.Name()
+
+		// Lstat through the root: a symbolic link is the link itself, so a
+		// link with a print-file name is skipped and never read.
+		info, infoErr := root.Lstat(name)
 		if infoErr != nil || !info.Mode().IsRegular() {
 			continue
 		}
 
-		name := entry.Name()
 		if sizes[name] == info.Size() {
 			stable[name]++
 		} else {
@@ -176,7 +195,7 @@ func scan(ctx context.Context, s Settings, folder string, sizes map[string]int64
 	}
 
 	for _, name := range ready {
-		importOne(ctx, s, folder, filepath.Join(folder, name))
+		importOne(ctx, s, folder, root, name)
 
 		delete(sizes, name)
 		delete(stable, name)
@@ -184,10 +203,11 @@ func scan(ctx context.Context, s Settings, folder string, sizes map[string]int64
 }
 
 // importOne copies one file into the storage and moves the source afterwards.
-func importOne(ctx context.Context, s Settings, folder, path string) {
-	name := filepath.Base(path)
+// The root keeps the read, the storage write and the move on the same tree.
+func importOne(ctx context.Context, s Settings, folder string, root *os.Root, name string) {
+	path := filepath.Join(folder, name)
 
-	info, err := regularFile(path)
+	info, err := regularFile(root, name)
 	if err != nil {
 		if errors.Is(err, errNotRegular) {
 			note(Import{At: now(), Folder: folder, Source: path, Result: "error", Detail: "skipped: not a regular file"})
@@ -195,13 +215,13 @@ func importOne(ctx context.Context, s Settings, folder, path string) {
 			return
 		}
 
-		fail(s, folder, path, name, "reading the file", err)
+		fail(root, s, folder, name, "reading the file", err)
 
 		return
 	}
 
 	if info.Size() > int64(s.MaxMB)<<20 {
-		fail(s, folder, path, name, "the file is larger than the limit",
+		fail(root, s, folder, name, "the file is larger than the limit",
 			fmt.Errorf("%d MB is more than %d MB", info.Size()>>20, s.MaxMB))
 
 		return
@@ -209,22 +229,20 @@ func importOne(ctx context.Context, s Settings, folder, path string) {
 
 	target, err := freeName(ctx, s.Storage, name)
 	if err != nil {
-		fail(s, folder, path, name, "looking for a free name", err)
+		fail(root, s, folder, name, "looking for a free name", err)
 
 		return
 	}
 
-	body, err := openRegular(path)
+	body, err := root.Open(name)
 	if err != nil {
-		// A file swapped for a symbolic link between the scan and the open is
-		// not moved into failed/, which would copy its target across devices.
-		if _, statErr := regularFile(path); statErr != nil {
+		if _, statErr := regularFile(root, name); statErr != nil {
 			note(Import{At: now(), Folder: folder, Source: path, Result: "error", Detail: "skipped: not a regular file"})
 
 			return
 		}
 
-		fail(s, folder, path, name, "opening the file", err)
+		fail(root, s, folder, name, "opening the file", err)
 
 		return
 	}
@@ -234,7 +252,7 @@ func importOne(ctx context.Context, s Settings, folder, path string) {
 	opened, err := body.Stat()
 	if err != nil {
 		_ = body.Close()
-		fail(s, folder, path, name, "reading the opened file", err)
+		fail(root, s, folder, name, "reading the opened file", err)
 
 		return
 	}
@@ -248,7 +266,7 @@ func importOne(ctx context.Context, s Settings, folder, path string) {
 
 	if opened.Size() > int64(s.MaxMB)<<20 {
 		_ = body.Close()
-		fail(s, folder, path, name, "the file is larger than the limit",
+		fail(root, s, folder, name, "the file is larger than the limit",
 			fmt.Errorf("%d MB is more than %d MB", opened.Size()>>20, s.MaxMB))
 
 		return
@@ -258,7 +276,7 @@ func importOne(ctx context.Context, s Settings, folder, path string) {
 	_ = body.Close()
 
 	if err != nil {
-		fail(s, folder, path, name, "writing into the storage", err)
+		fail(root, s, folder, name, "writing into the storage", err)
 
 		return
 	}
@@ -270,7 +288,7 @@ func importOne(ctx context.Context, s Settings, folder, path string) {
 	view.mu.Unlock()
 
 	if s.MoveOnSuccess {
-		if moveErr := moveTo(path, filepath.Join(folder, "successful", name)); moveErr != nil {
+		if moveErr := moveTo(root, name, filepath.Join("successful", name)); moveErr != nil {
 			note(Import{At: now(), Folder: folder, Source: path, Target: written.Path, Result: "imported", Detail: "could not move the source: " + moveErr.Error()})
 		}
 	}
@@ -301,11 +319,12 @@ func freeName(ctx context.Context, storage, name string) (string, error) {
 }
 
 // fail moves a source it could not import into failed/ and writes what went
-// wrong beside it.
-func fail(s Settings, folder, path, name, step string, cause error) {
-	// fail runs after a read or an open; never move a non-regular path, because
-	// the cross-device branch of moveTo would copy the link's target.
-	if info, statErr := os.Lstat(path); statErr == nil && !info.Mode().IsRegular() {
+// wrong beside it. The move and the report stay under the watched folder, and
+// the report is created exclusively so an existing symlink is never followed.
+func fail(root *os.Root, s Settings, folder, name, step string, cause error) {
+	path := filepath.Join(folder, name)
+
+	if info, statErr := root.Lstat(name); statErr == nil && !info.Mode().IsRegular() {
 		note(Import{At: now(), Folder: folder, Source: path, Result: "error", Detail: step + ": not a regular file"})
 
 		return
@@ -318,19 +337,37 @@ func fail(s Settings, folder, path, name, step string, cause error) {
 	reason := fmt.Sprintf("Step: %s\nReason: %v\nTime: %s\nSource: %s\n", step, cause, now(), path)
 	note(Import{At: now(), Folder: folder, Source: path, Result: "failed", Detail: step + ": " + cause.Error()})
 
-	destination := filepath.Join(folder, "failed", name)
-	if moveErr := moveTo(path, destination); moveErr != nil {
+	destination := filepath.Join("failed", name)
+	if moveErr := moveTo(root, name, destination); moveErr != nil {
 		note(Import{At: now(), Folder: folder, Source: path, Result: "failed", Detail: "could not move the source: " + moveErr.Error()})
 
 		return
 	}
 
-	_ = os.WriteFile(destination+"-failure.txt", []byte(reason), 0o600)
+	report := filepath.Join("failed", name+"-failure.txt")
+	body, err := root.OpenFile(report, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
+	if err != nil {
+		note(Import{At: now(), Folder: folder, Source: path, Result: "failed", Detail: "could not write the failure report: " + err.Error()})
+
+		return
+	}
+
+	if _, err = body.WriteString(reason); err != nil {
+		_ = body.Close()
+		note(Import{At: now(), Folder: folder, Source: path, Result: "failed", Detail: "could not write the failure report: " + err.Error()})
+
+		return
+	}
+
+	if err = body.Close(); err != nil {
+		note(Import{At: now(), Folder: folder, Source: path, Result: "failed", Detail: "could not write the failure report: " + err.Error()})
+	}
 }
 
 // moveTo moves a file, copying when the two paths are on different devices.
-func moveTo(from, to string) error {
-	info, err := os.Lstat(from)
+// Both ends are relative to the watched folder and go through its root.
+func moveTo(root *os.Root, from, to string) error {
+	info, err := root.Lstat(from)
 	if err != nil {
 		return err
 	}
@@ -339,29 +376,29 @@ func moveTo(from, to string) error {
 		return errNotRegular
 	}
 
-	if err := os.MkdirAll(filepath.Dir(to), 0o755); err != nil {
+	if err := root.MkdirAll(filepath.Dir(to), 0o755); err != nil {
 		return err
 	}
 
-	if err := os.Rename(from, to); err == nil {
+	if err := root.Rename(from, to); err == nil {
 		return nil
 	}
 
-	source, err := openRegular(from)
+	source, err := root.Open(from)
 	if err != nil {
 		return err
 	}
 
 	defer func() { _ = source.Close() }()
 
-	target, err := os.Create(to)
+	target, err := root.OpenFile(to, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o666)
 	if err != nil {
 		return err
 	}
 
 	if _, err = io.Copy(target, source); err != nil {
 		_ = target.Close()
-		_ = os.Remove(to)
+		_ = root.Remove(to)
 
 		return err
 	}
@@ -370,7 +407,7 @@ func moveTo(from, to string) error {
 		return err
 	}
 
-	return os.Remove(from)
+	return root.Remove(from)
 }
 
 // note keeps one line for the page.

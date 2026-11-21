@@ -5,19 +5,30 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"runtime"
 	"testing"
 )
 
 // makeSymlink creates a link or skips a platform that will not let the test
-// make one. Windows needs a privilege for this, so the security check is
-// tested where the fixture can be built.
+// make one. Windows needs a privilege for this, so the check is tested where
+// the fixture can be built.
 func makeSymlink(t *testing.T, target, link string) {
 	t.Helper()
 
 	if err := os.Symlink(target, link); err != nil {
 		t.Skipf("symbolic links are not available here: %v", err)
 	}
+}
+
+func openTestRoot(t *testing.T, dir string) *os.Root {
+	t.Helper()
+
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = root.Close() })
+
+	return root
 }
 
 func TestRegularFileRefusesSymbolicLinks(t *testing.T) {
@@ -30,11 +41,13 @@ func TestRegularFileRefusesSymbolicLinks(t *testing.T) {
 	link := filepath.Join(dir, "x.gcode")
 	makeSymlink(t, secret, link)
 
-	if _, err := regularFile(link); !errors.Is(err, errNotRegular) {
+	root := openTestRoot(t, dir)
+
+	if _, err := regularFile(root, "x.gcode"); !errors.Is(err, errNotRegular) {
 		t.Fatalf("regularFile(symlink) = %v, want errNotRegular", err)
 	}
 
-	info, err := regularFile(secret)
+	info, err := regularFile(root, "secret.txt")
 	if err != nil {
 		t.Fatalf("regularFile(regular) = %v", err)
 	}
@@ -44,8 +57,8 @@ func TestRegularFileRefusesSymbolicLinks(t *testing.T) {
 	}
 }
 
-// TestScanSkipsSymbolicLinks is the regression for the review finding: a link
-// with a print-file name must not become ready, and must not reach the store.
+// TestScanSkipsSymbolicLinks is the source-side regression: a link with a
+// print-file name must not become ready, and must not reach the store.
 func TestScanSkipsSymbolicLinks(t *testing.T) {
 	dir := t.TempDir()
 	secret := filepath.Join(dir, "secret.txt")
@@ -67,27 +80,6 @@ func TestScanSkipsSymbolicLinks(t *testing.T) {
 	}
 }
 
-func TestOpenRegularRefusesSymbolicLinks(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("Windows has no O_NOFOLLOW here; the lstat and the descriptor check are the guard")
-	}
-
-	dir := t.TempDir()
-	secret := filepath.Join(dir, "secret.txt")
-	if err := os.WriteFile(secret, []byte("server configuration"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-
-	link := filepath.Join(dir, "x.gcode")
-	makeSymlink(t, secret, link)
-
-	body, err := openRegular(link)
-	if err == nil {
-		_ = body.Close()
-		t.Fatal("openRegular followed a symbolic link")
-	}
-}
-
 func TestMoveToRefusesSymbolicLinks(t *testing.T) {
 	dir := t.TempDir()
 	secret := filepath.Join(dir, "secret.txt")
@@ -98,12 +90,107 @@ func TestMoveToRefusesSymbolicLinks(t *testing.T) {
 	link := filepath.Join(dir, "x.gcode")
 	makeSymlink(t, secret, link)
 
-	destination := filepath.Join(dir, "successful", "x.gcode")
-	if err := moveTo(link, destination); !errors.Is(err, errNotRegular) {
+	root := openTestRoot(t, dir)
+
+	if err := moveTo(root, "x.gcode", filepath.Join("successful", "x.gcode")); !errors.Is(err, errNotRegular) {
 		t.Fatalf("moveTo(symlink) = %v, want errNotRegular", err)
 	}
 
-	if _, err := os.Lstat(destination); !errors.Is(err, os.ErrNotExist) {
-		t.Fatalf("moveTo created %s from a symbolic link", destination)
+	if _, err := os.Lstat(filepath.Join(dir, "successful", "x.gcode")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatal("moveTo created a destination from a symbolic link")
+	}
+}
+
+// TestFailureReportDoesNotFollowSymlink is the destination-side regression
+// from the review: a failure report pre-created as a link must not make
+// fail() truncate the file it points at.
+func TestFailureReportDoesNotFollowSymlink(t *testing.T) {
+	dir := t.TempDir()
+	outside := t.TempDir()
+	secret := filepath.Join(outside, "secret.txt")
+	const content = "server database"
+
+	if err := os.WriteFile(secret, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.MkdirAll(filepath.Join(dir, "failed"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	report := filepath.Join(dir, "failed", "x.gcode-failure.txt")
+	makeSymlink(t, secret, report)
+
+	if err := os.WriteFile(filepath.Join(dir, "x.gcode"), make([]byte, 2<<20), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	root := openTestRoot(t, dir)
+	importOne(context.Background(), Settings{MaxMB: 1}, dir, root, "x.gcode")
+
+	got, err := os.ReadFile(secret)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(got) != content {
+		t.Fatalf("the failure report followed the link and changed its target: %q", got)
+	}
+
+	info, err := os.Lstat(filepath.Join(dir, "failed", "x.gcode"))
+	if err != nil || !info.Mode().IsRegular() {
+		t.Fatalf("the source was not moved to failed/: %v", err)
+	}
+}
+
+// TestFailedDirectorySymlinkDoesNotEscape checks that a failed/ link to a
+// directory outside the watched folder cannot receive the moved file.
+func TestFailedDirectorySymlinkDoesNotEscape(t *testing.T) {
+	dir := t.TempDir()
+	outside := t.TempDir()
+
+	makeSymlink(t, outside, filepath.Join(dir, "failed"))
+
+	if err := os.WriteFile(filepath.Join(dir, "x.gcode"), make([]byte, 2<<20), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	root := openTestRoot(t, dir)
+	importOne(context.Background(), Settings{MaxMB: 1}, dir, root, "x.gcode")
+
+	for _, name := range []string{"x.gcode", "x.gcode-failure.txt"} {
+		if _, err := os.Lstat(filepath.Join(outside, name)); !errors.Is(err, os.ErrNotExist) {
+			t.Fatalf("a failed/ symlink wrote %s outside the watched folder", name)
+		}
+	}
+
+	if info, err := os.Lstat(filepath.Join(dir, "x.gcode")); err != nil || !info.Mode().IsRegular() {
+		t.Fatalf("the source should stay in the watched folder when the move escapes: %v", err)
+	}
+}
+
+// TestSuccessfulDirectorySymlinkDoesNotEscape is the same check for the move
+// after a committed import.
+func TestSuccessfulDirectorySymlinkDoesNotEscape(t *testing.T) {
+	dir := t.TempDir()
+	outside := t.TempDir()
+
+	makeSymlink(t, outside, filepath.Join(dir, "successful"))
+
+	if err := os.WriteFile(filepath.Join(dir, "x.gcode"), []byte("print"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	root := openTestRoot(t, dir)
+	if err := moveTo(root, "x.gcode", filepath.Join("successful", "x.gcode")); err == nil {
+		t.Fatal("moveTo accepted a successful/ symlink that leaves the watched folder")
+	}
+
+	if _, err := os.Lstat(filepath.Join(outside, "x.gcode")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatal("a successful/ symlink moved the file outside the watched folder")
+	}
+
+	if info, err := os.Lstat(filepath.Join(dir, "x.gcode")); err != nil || !info.Mode().IsRegular() {
+		t.Fatalf("the source should stay in the watched folder when the move escapes: %v", err)
 	}
 }

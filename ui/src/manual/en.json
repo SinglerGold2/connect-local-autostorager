@@ -62,5 +62,5 @@
   "rightsImportant": "IMPORTANT",
   "beforeTitle": "Before you start",
   "filesTitle": "Which files are taken",
-  "files": "Only regular files are taken. The watcher reads the top level of each supervised folder and does not search subfolders. A symbolic link is skipped, even when its name ends in .gcode or .bgcode: it stays where it is and is not imported, moved or followed. A link can point at any file the server can read, so the watcher never follows one. The same applies to directories, devices, pipes and sockets. Replace the link with the file itself if it should be printed."
+  "files": "Only regular files are taken. The watcher reads the top level of each supervised folder and does not search subfolders. A symbolic link is skipped, even when its name ends in .gcode or .bgcode: it stays where it is and is not imported, moved or followed. A link can point at any file the server can read, so the watcher never follows one. The same applies to directories, devices, pipes and sockets. Replace the link with the file itself if it should be printed. The watcher never leaves the watched folder. If successful/ or failed/ is a link that points outside, the move is refused. A failure report is created new and is never written through an existing file or link."
 }

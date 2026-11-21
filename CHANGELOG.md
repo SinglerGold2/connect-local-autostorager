@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.2 - 2026-11-20
+## 0.2.3 - 2026-11-21
 
 The first public release.
 
@@ -61,8 +61,13 @@ The first public release.
   opened without following it where the platform allows, and checked again on
   the opened descriptor before it is read.
 - A non-regular source is never moved into `successful/` or `failed/`.
-- Tests cover the scan, the open and the move with a symbolic link, and keep a
-  regular `.gcode` import as the counter-check.
+- The move and the failure report use one `os.Root` for the watched folder.
+  A `successful/` or `failed/` that links outside is refused, and the report
+  is created with `O_CREATE|O_EXCL` so an existing file or link is never
+  followed.
+- Tests cover the scan, the open, the move, the report and both destination
+  directories with a symbolic link, and keep a regular `.gcode` import as the
+  counter-check.
 
 ## Pre-release history
 
