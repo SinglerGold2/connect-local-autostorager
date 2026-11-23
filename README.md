@@ -33,10 +33,10 @@ The extension is a normal module. Install it the way your server takes modules.
 ### Linux, server in a container
 
 ```bash
-docker cp autostorager-0.2.3.tar.gz prusa-connect-local:/tmp/
+docker cp autostorager-0.2.5.tar.gz prusa-connect-local:/tmp/
 docker exec -w /app prusa-connect-local /app/prusa_connect_local \
-  module add github.com/singlergold2/connect-local-autostorager@0.2.3 \
-  -from /tmp/autostorager-0.2.3.tar.gz -approve -database sqlite
+  module add github.com/singlergold2/connect-local-autostorager@0.2.5 \
+  -from /tmp/autostorager-0.2.5.tar.gz -approve -database sqlite
 docker restart prusa-connect-local
 ```
 
@@ -52,8 +52,8 @@ Run the command as the user that owns that data, then restart the unit.
 ```bash
 sudo systemctl stop prusa-connect
 sudo -u prusa-connect /opt/prusa-connect/prusa_connect_local module add \
-  github.com/singlergold2/connect-local-autostorager@0.2.3 \
-  -from /tmp/autostorager-0.2.3.tar.gz -approve -database sqlite
+  github.com/singlergold2/connect-local-autostorager@0.2.5 \
+  -from /tmp/autostorager-0.2.5.tar.gz -approve -database sqlite
 sudo systemctl start prusa-connect
 ```
 
@@ -70,16 +70,16 @@ server afterwards.
 
 ```bash
 cd ~/prusa-connect
-./prusa_connect_local module add github.com/singlergold2/connect-local-autostorager@0.2.3 \
-  -from ~/Downloads/autostorager-0.2.3.tar.gz -approve -database sqlite
+./prusa_connect_local module add github.com/singlergold2/connect-local-autostorager@0.2.5 \
+  -from ~/Downloads/autostorager-0.2.5.tar.gz -approve -database sqlite
 ```
 
 ### Windows
 
 ```powershell
 cd C:\prusa-connect
-.\prusa_connect_windows_amd64.exe module add github.com/singlergold2/connect-local-autostorager@0.2.3 `
-  -from C:\Users\you\Downloads\autostorager-0.2.3.tar.gz -approve -database sqlite
+.\prusa_connect_windows_amd64.exe module add github.com/singlergold2/connect-local-autostorager@0.2.5 `
+  -from C:\Users\you\Downloads\autostorager-0.2.5.tar.gz -approve -database sqlite
 ```
 
 Then restart the server. The module lands under
@@ -89,8 +89,8 @@ Then restart the server. The module lands under
 
 ```bash
 cd ~/prusa-connect
-./prusa_connect_macos_arm64 module add github.com/singlergold2/connect-local-autostorager@0.2.3 \
-  -from ~/Downloads/autostorager-0.2.3.tar.gz -approve -database sqlite
+./prusa_connect_macos_arm64 module add github.com/singlergold2/connect-local-autostorager@0.2.5 \
+  -from ~/Downloads/autostorager-0.2.5.tar.gz -approve -database sqlite
 ```
 
 Then restart the server. If macOS refuses a downloaded file, clear the
@@ -287,6 +287,57 @@ be real directories inside it; a link that points outside is refused. A
 failure report is created new and is never written through an existing file or
 link.
 
+## A folder on another computer
+
+Autostorager runs on the PCL server, not on your desktop. A folder on another computer is a network share: the server mounts it first, and the mount is then a normal folder for the module. The module itself does not speak SMB or NFS.
+
+The manual has the full walkthrough. The short version, with a Linux desktop at `192.168.178.25` and the folder `/mnt/g/Autostorager`:
+
+On the desktop, share the folder and set a Samba password:
+
+```ini
+# /etc/samba/smb.conf
+[global]
+   workgroup = WORKGROUP
+   security = user
+   map to guest = bad user
+   server min protocol = SMB2
+
+[autostorager]
+   path = /mnt/g/Autostorager
+   browseable = yes
+   read only = no
+   valid users = ulli
+   force user = ulli
+   create mask = 0664
+   directory mask = 0775
+   follow symlinks = no
+```
+
+```bash
+sudo smbpasswd -a ulli
+sudo systemctl enable --now smb.service
+```
+
+On the PCL server, mount it and keep the credentials out of the command line:
+
+```bash
+sudo install -m 600 /dev/null /etc/samba/cred-autostorager
+printf 'username=ulli\npassword=YOUR-SAMBA-PASSWORD\n' | sudo tee /etc/samba/cred-autostorager >/dev/null
+sudo mkdir -p /home/ulli/connect-local/config/autostorager-g
+sudo mount -t cifs //192.168.178.25/Autostorager \
+  /home/ulli/connect-local/config/autostorager-g \
+  -o credentials=/etc/samba/cred-autostorager,uid=0,gid=0,file_mode=0666,dir_mode=0777,vers=3.0
+```
+
+Add the container path, not the desktop path, as a second folder in Autostorager:
+
+```
+/app/config/autostorager-g
+```
+
+For a reboot, add the mount to `/etc/fstab` with `nofail,x-systemd.automount`; the manual has the exact line. If the desktop is off, the mount is missing and the module reports that folder as an error. Up to four such mounts can be watched; each keeps its own `successful/` and `failed/` on its own share.
+
 ## Checking it works
 
 Drop a small `.gcode` into a supervised folder. Within about one interval it
@@ -325,8 +376,8 @@ whether it holds up.
 A release is published from GitHub, never by hand:
 
 ```bash
-git tag -a v0.2.3 -m "Autostorager 0.2.3"
-git push origin v0.2.3
+git tag -a v0.2.5 -m "Autostorager 0.2.5"
+git push origin v0.2.5
 ```
 
 Publishing that release on GitHub starts `.github/workflows/release.yml`, which

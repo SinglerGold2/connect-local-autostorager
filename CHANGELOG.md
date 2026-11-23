@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.5 - 2026-11-23
+
+### Manual
+
+- A new section, "The folder on another computer", explains the whole path:
+  a Samba share on the desktop, a CIFS mount on the PCL server, the
+  container path, the second source, `fstab` and automount, credentials, and
+  the four-source case. The README has the short version.
+
 ## 0.2.3 - 2026-11-21
 
 The first public release.

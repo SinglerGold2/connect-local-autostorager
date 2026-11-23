@@ -100,6 +100,22 @@
         <h3 class="mt-2 font-semibold">{m('localTitle')}</h3>
         <p>{m('local')}</p>
 
+        <h3 class="mt-2 font-semibold">{m('remoteTitle')}</h3>
+        <p>{m('remote')}</p>
+        <pre class="bg-neutral-100 rounded overflow-x-auto p-2 text-xs">{m(
+            'remoteSamba',
+          )}</pre>
+        <p>{m('remoteShare')}</p>
+        <pre class="bg-neutral-100 rounded overflow-x-auto p-2 text-xs">{m(
+            'remoteMount',
+          )}</pre>
+        <p>{m('remoteFstab')}</p>
+        <pre class="bg-neutral-100 rounded overflow-x-auto p-2 text-xs">{m(
+            'remoteFstabLine',
+          )}</pre>
+        <p>{m('remoteAdd')}</p>
+        <p class="text-neutral-500">{m('remoteNote')}</p>
+
         <h3 class="mt-2 font-semibold">{m('pathTitle')}</h3>
         <p>{m('path')}</p>
 
