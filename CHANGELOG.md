@@ -4,9 +4,12 @@
 
 ### Fixed
 
-- The cross-device copy fallback in `moveTo` creates its destination with
-  `O_CREATE|O_EXCL`, so it cannot truncate an existing file or a pre-created
-  symlink. This matches the failure report.
+- The source move into `successful/` or `failed/` chooses a free name when
+  the destination exists: `test.gcode` becomes `test-1.gcode`, and the
+  existing file stays.
+- The cross-device copy fallback creates its final path with
+  `O_CREATE|O_EXCL` as the race guard, so it cannot truncate or follow a
+  pre-created file or symlink. The failure report follows the moved name.
 
 ### Manual
 

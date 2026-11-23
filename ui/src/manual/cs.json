@@ -49,7 +49,7 @@
   "languageTitle": "Jazyk",
   "language": "Jazyk se nastavuje na serveru, ne na této stránce: Rozšíření, Autostorager, Settings, pole language. system znamená jazyk prohlížeče; en, de nebo cs zvolí pevný jazyk. Čeština je cs, ne cz, kód země se však přijme.",
   "languageRestart": "Volba se uloží hned a čte se při startu, takže se modul po uložení restartuje. Zvolte klidnou chvíli: import, který právě běží, tím restartem skončí. Jazyk, který balíček neobsahuje, se vrátí k jazyku prohlížeče a odtud k angličtině. Tlačítka výše přepnou jazyk pro tuto návštěvu, aniž by cokoli ukládala.",
-  "languageContribute": "Chybí vám váš jazyk? Pomozte na GitHubu. Zkopírujte locales/en.json a manual/en.json na <tag>.json, přeložte hodnoty, klíče nechte být a otevřete pull request. Nikdo tady by neměl psát jazyk, kterým nemluví, a strojový překlad se tak i čte. Čeština je přesně to: zkušební balon přeložený strojem. Jestli obstojí, musí posoudit čeští čtenáři.",
+  "languageContribute": "Chybí vám váš jazyk? Pomozte na GitHubu. Zkopírujte locales/en.json a manual/en.json na <tag>.json, přeložte hodnoty, klíče nechte být a otevřete pull request. Nikdo tady by neměl psát jazyk, kterým nemluví, a strojový překlad se tak i čte. Čeština je přesně to: zkušební balon přeložený strojem. Jestli obstojí, musí posoudit čeští čtenáři. Nový soubor musí skončit na GitHubu; místní kopie se nedodává.",
   "languageRepo": "github.com/SinglerGold2/connect-local-autostorager",
   "rightsTitle": "Uživatelé a práva",
   "rights": "Prusa Connect Local vede vlastní účty. První účet vytvořený při nastavení je administrátor org:local. Administrátor přidává osoby v Settings > People; roli na organizaci zapíše grant níže. Shell serveru jako root není účet PCL.",

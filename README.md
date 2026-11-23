@@ -397,8 +397,9 @@ module.
 
 The texts are files. To add a language, copy `ui/src/locales/en.json` and
 `ui/src/manual/en.json` to `<tag>.json`, translate the values, keep the keys,
-and open a pull request. The Czech is machine-translated; Czech readers decide
-whether it holds up.
+and open a pull request. The new file has to land on GitHub; a local copy does
+not ship. The Czech is machine-translated; Czech readers decide whether it
+holds up.
 
 ## Releasing
 
