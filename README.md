@@ -287,7 +287,36 @@ be real directories inside it; a link that points outside is refused. A
 failure report is created new and is never written through an existing file or
 link.
 
-## A folder on another computer
+## Where should the folder live?
+
+There are three setups:
+
+1. **PCL and the folder on the same computer:** one directory. Nothing is shared or mounted.
+2. **PCL on a server, the folder on the server:** create one folder on the server, share it, and let every client machine send its files there. This is the recommended setup for a farm: one queue, one place to look. The clients need no PCL and no Autostorager, only the share.
+3. **PCL on a server, the folders stay on the clients:** share each client folder and mount it on the server. This is more work, but it is how the server watches a folder that physically lives on a Windows, Linux or Mac machine. Up to four folders are supported.
+
+The manual has all three with the commands, the Windows/Linux/macOS client steps, `fstab` and the caveats.
+
+## PCL on a server: one folder on the server
+
+On the server host, create the folder, make it visible in the PCL container, and share it with Samba:
+
+```ini
+[autostorager]
+   path = /srv/autostorager
+   browseable = yes
+   read only = no
+   valid users = ulli
+   force user = ulli
+   create mask = 0664
+   directory mask = 0775
+   follow symlinks = no
+```
+
+Add the container path for the same host folder in Autostorager, not the host path. On Windows, map `\\SERVER\autostorager`; on Linux, open `smb://SERVER/autostorager`; on macOS, Finder > Go > Connect to Server, `smb://SERVER/autostorager`. Every client writes into the same queue.
+
+## The folder stays on a client
+
 
 Autostorager runs on the PCL server, not on your desktop. A folder on another computer is a network share: the server mounts it first, and the mount is then a normal folder for the module. The module itself does not speak SMB or NFS.
 

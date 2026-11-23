@@ -90,6 +90,19 @@
         <h3 class="mt-2 font-semibold">{m('filesTitle')}</h3>
         <p>{m('files')}</p>
 
+        <h3 class="mt-2 font-semibold">{m('whereTitle')}</h3>
+        <p>{m('where')}</p>
+
+        <h3 class="mt-2 font-semibold">{m('localTitle')}</h3>
+        <p>{m('local')}</p>
+
+        <h3 class="mt-2 font-semibold">{m('serverTitle')}</h3>
+        <p>{m('server')}</p>
+        <pre class="bg-neutral-100 rounded overflow-x-auto p-2 text-xs">{m(
+            'serverShare',
+          )}</pre>
+        <p>{m('serverClients')}</p>
+
         <h3 class="mt-2 font-semibold">{m('linuxTitle')}</h3>
         <p>{m('linux')}</p>
         <pre class="bg-neutral-100 rounded overflow-x-auto p-2 text-xs">{m(
@@ -97,15 +110,13 @@
           )}</pre>
         <p>{m('linuxPath')}</p>
 
-        <h3 class="mt-2 font-semibold">{m('localTitle')}</h3>
-        <p>{m('local')}</p>
-
         <h3 class="mt-2 font-semibold">{m('remoteTitle')}</h3>
         <p>{m('remote')}</p>
         <pre class="bg-neutral-100 rounded overflow-x-auto p-2 text-xs">{m(
             'remoteSamba',
           )}</pre>
-        <p>{m('remoteShare')}</p>
+        <p>{m('remoteWindows')}</p>
+        <p>{m('remoteMac')}</p>
         <pre class="bg-neutral-100 rounded overflow-x-auto p-2 text-xs">{m(
             'remoteMount',
           )}</pre>
