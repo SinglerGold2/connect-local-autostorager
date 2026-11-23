@@ -92,7 +92,7 @@ func TestMoveToRefusesSymbolicLinks(t *testing.T) {
 
 	root := openTestRoot(t, dir)
 
-	if err := moveTo(root, "x.gcode", filepath.Join("successful", "x.gcode")); !errors.Is(err, errNotRegular) {
+	if _, err := moveTo(root, "x.gcode", filepath.Join("successful", "x.gcode")); !errors.Is(err, errNotRegular) {
 		t.Fatalf("moveTo(symlink) = %v, want errNotRegular", err)
 	}
 
@@ -182,7 +182,7 @@ func TestSuccessfulDirectorySymlinkDoesNotEscape(t *testing.T) {
 	}
 
 	root := openTestRoot(t, dir)
-	if err := moveTo(root, "x.gcode", filepath.Join("successful", "x.gcode")); err == nil {
+	if _, err := moveTo(root, "x.gcode", filepath.Join("successful", "x.gcode")); err == nil {
 		t.Fatal("moveTo accepted a successful/ symlink that leaves the watched folder")
 	}
 
@@ -231,5 +231,42 @@ func TestCopyFallbackRefusesExistingDestination(t *testing.T) {
 
 	if info, err := os.Lstat(source); err != nil || !info.Mode().IsRegular() {
 		t.Fatalf("copyTo removed the source after a refused destination: %v", err)
+	}
+}
+
+// TestMoveToRenamesExistingDestination keeps both source files when the
+// destination name is already taken.
+func TestMoveToRenamesExistingDestination(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(dir, "successful"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(dir, "successful", "test.gcode"), []byte("old"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(filepath.Join(dir, "test.gcode"), []byte("new"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	root := openTestRoot(t, dir)
+	moved, err := moveTo(root, "test.gcode", filepath.Join("successful", "test.gcode"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if moved != filepath.Join("successful", "test-1.gcode") {
+		t.Fatalf("moved to %q, want successful/test-1.gcode", moved)
+	}
+
+	old, err := os.ReadFile(filepath.Join(dir, "successful", "test.gcode"))
+	if err != nil || string(old) != "old" {
+		t.Fatalf("existing destination was changed: %q, %v", old, err)
+	}
+
+	fresh, err := os.ReadFile(filepath.Join(dir, "successful", "test-1.gcode"))
+	if err != nil || string(fresh) != "new" {
+		t.Fatalf("renamed source is wrong: %q, %v", fresh, err)
 	}
 }

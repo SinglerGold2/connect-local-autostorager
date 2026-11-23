@@ -288,7 +288,7 @@ func importOne(ctx context.Context, s Settings, folder string, root *os.Root, na
 	view.mu.Unlock()
 
 	if s.MoveOnSuccess {
-		if moveErr := moveTo(root, name, filepath.Join("successful", name)); moveErr != nil {
+		if _, moveErr := moveTo(root, name, filepath.Join("successful", name)); moveErr != nil {
 			note(Import{At: now(), Folder: folder, Source: path, Target: written.Path, Result: "imported", Detail: "could not move the source: " + moveErr.Error()})
 		}
 	}
@@ -338,13 +338,14 @@ func fail(root *os.Root, s Settings, folder, name, step string, cause error) {
 	note(Import{At: now(), Folder: folder, Source: path, Result: "failed", Detail: step + ": " + cause.Error()})
 
 	destination := filepath.Join("failed", name)
-	if moveErr := moveTo(root, name, destination); moveErr != nil {
+	moved, moveErr := moveTo(root, name, destination)
+	if moveErr != nil {
 		note(Import{At: now(), Folder: folder, Source: path, Result: "failed", Detail: "could not move the source: " + moveErr.Error()})
 
 		return
 	}
 
-	report := filepath.Join("failed", name+"-failure.txt")
+	report := moved + "-failure.txt"
 	body, err := root.OpenFile(report, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
 	if err != nil {
 		note(Import{At: now(), Folder: folder, Source: path, Result: "failed", Detail: "could not write the failure report: " + err.Error()})
@@ -366,25 +367,60 @@ func fail(root *os.Root, s Settings, folder, name, step string, cause error) {
 
 // moveTo moves a file, copying when the two paths are on different devices.
 // Both ends are relative to the watched folder and go through its root.
-func moveTo(root *os.Root, from, to string) error {
+func moveTo(root *os.Root, from, to string) (string, error) {
 	info, err := root.Lstat(from)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if !info.Mode().IsRegular() {
-		return errNotRegular
+		return "", errNotRegular
 	}
 
 	if err := root.MkdirAll(filepath.Dir(to), 0o755); err != nil {
-		return err
+		return "", err
+	}
+
+	to, err = freeMoveName(root, to)
+	if err != nil {
+		return "", err
 	}
 
 	if err := root.Rename(from, to); err == nil {
-		return nil
+		return to, nil
 	}
 
-	return copyTo(root, from, to)
+	if err := copyTo(root, from, to); err != nil {
+		return "", err
+	}
+
+	return to, nil
+}
+
+// freeMoveName keeps both files when the destination already exists. The
+// Storage name has its own freeName; this one is for the source move into
+// successful/ or failed/.
+func freeMoveName(root *os.Root, to string) (string, error) {
+	ext := filepath.Ext(to)
+	base := strings.TrimSuffix(to, ext)
+
+	for attempt := 0; attempt < 1000; attempt++ {
+		candidate := to
+		if attempt > 0 {
+			candidate = fmt.Sprintf("%s-%d%s", base, attempt, ext)
+		}
+
+		_, err := root.Lstat(candidate)
+		if errors.Is(err, os.ErrNotExist) {
+			return candidate, nil
+		}
+
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return "", fmt.Errorf("no free move name for %s", to)
 }
 
 // copyTo is the cross-device fallback of moveTo. It creates the destination
