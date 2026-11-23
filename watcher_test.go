@@ -194,3 +194,42 @@ func TestSuccessfulDirectorySymlinkDoesNotEscape(t *testing.T) {
 		t.Fatalf("the source should stay in the watched folder when the move escapes: %v", err)
 	}
 }
+
+// TestCopyFallbackRefusesExistingDestination is the cross-device half of the
+// move: an existing file or symlink at the destination must not be truncated
+// or followed.
+func TestCopyFallbackRefusesExistingDestination(t *testing.T) {
+	dir := t.TempDir()
+	outside := t.TempDir()
+
+	source := filepath.Join(dir, "x.gcode")
+	if err := os.WriteFile(source, []byte("new print"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	secret := filepath.Join(outside, "secret.txt")
+	if err := os.WriteFile(secret, []byte("server database"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	link := filepath.Join(dir, "x.gcode-copy")
+	makeSymlink(t, secret, link)
+
+	root := openTestRoot(t, dir)
+	if err := copyTo(root, "x.gcode", "x.gcode-copy"); err == nil {
+		t.Fatal("copyTo accepted an existing symlink at the destination")
+	}
+
+	got, err := os.ReadFile(secret)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(got) != "server database" {
+		t.Fatalf("copyTo followed the destination link and changed its target: %q", got)
+	}
+
+	if info, err := os.Lstat(source); err != nil || !info.Mode().IsRegular() {
+		t.Fatalf("copyTo removed the source after a refused destination: %v", err)
+	}
+}

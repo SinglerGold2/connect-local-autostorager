@@ -384,6 +384,13 @@ func moveTo(root *os.Root, from, to string) error {
 		return nil
 	}
 
+	return copyTo(root, from, to)
+}
+
+// copyTo is the cross-device fallback of moveTo. It creates the destination
+// exclusively: a pre-created file or symlink at that path makes it fail rather
+// than truncate or follow it, just like the failure report.
+func copyTo(root *os.Root, from, to string) error {
 	source, err := root.Open(from)
 	if err != nil {
 		return err
@@ -391,7 +398,7 @@ func moveTo(root *os.Root, from, to string) error {
 
 	defer func() { _ = source.Close() }()
 
-	target, err := root.OpenFile(to, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o666)
+	target, err := root.OpenFile(to, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o666)
 	if err != nil {
 		return err
 	}

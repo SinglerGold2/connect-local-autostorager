@@ -2,6 +2,12 @@
 
 ## 0.2.5 - 2026-11-23
 
+### Fixed
+
+- The cross-device copy fallback in `moveTo` creates its destination with
+  `O_CREATE|O_EXCL`, so it cannot truncate an existing file or a pre-created
+  symlink. This matches the failure report.
+
 ### Manual
 
 - A new section, "The folder on another computer", explains the whole path:
