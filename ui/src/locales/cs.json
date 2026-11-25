@@ -39,5 +39,6 @@
   "autostorager.page.sourceOnline": "online",
   "autostorager.page.sourceDown": "zdroj je nedostupný",
   "autostorager.page.sourceError": "chyba zdroje",
-  "autostorager.page.logs": "Logy Autostorager"
+  "autostorager.page.logs": "Logy Autostorager",
+  "autostorager.page.readManual": "Před nastavením si přečtěte Manual - Autostorager. Cesta ke složce závisí na tom, zda PCL a složka běží na stejném počítači, na serveru nebo na jiném počítači."
 }

@@ -39,5 +39,6 @@
   "autostorager.page.sourceOnline": "online",
   "autostorager.page.sourceDown": "source is down",
   "autostorager.page.sourceError": "source error",
-  "autostorager.page.logs": "Autostorager logs"
+  "autostorager.page.logs": "Autostorager logs",
+  "autostorager.page.readManual": "Read Manual - Autostorager before you set this up. The folder path depends on whether PCL and the folder are on the same machine, on a server, or on another computer."
 }

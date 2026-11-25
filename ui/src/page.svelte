@@ -131,6 +131,11 @@
       <div class="flex flex-col gap-2">
         <p class="text-base">{t('autostorager.page.what')}</p>
         <p class="text-neutral-600 text-sm">{t('autostorager.page.delay')}</p>
+        <p
+          class="rounded border-amber-500 bg-amber-500/10 border-l-4 p-2 text-sm"
+        >
+          {t('autostorager.page.readManual')}
+        </p>
       </div>
     </CardContent>
   </Card>
