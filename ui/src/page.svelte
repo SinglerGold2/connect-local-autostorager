@@ -125,17 +125,18 @@
 <div class="flex flex-col gap-4">
   <PageHeader title={t('autostorager.page.title')} />
 
+  <div
+    class="rounded border-l-4 p-3 text-sm"
+    style="border-left-color: var(--state-attention-edge); background: color-mix(in srgb, var(--state-attention) 12%, transparent);"
+  >
+    {t('autostorager.page.readManual')}
+  </div>
+
   <Card>
     <CardContent>
       <div class="flex flex-col gap-2">
         <p class="text-base">{t('autostorager.page.what')}</p>
         <p class="text-neutral-600 text-sm">{t('autostorager.page.delay')}</p>
-        <p
-          class="rounded border-l-4 p-2 text-sm"
-          style="border-left-color: var(--state-attention-edge); background: color-mix(in srgb, var(--state-attention) 12%, transparent);"
-        >
-          {t('autostorager.page.readManual')}
-        </p>
       </div>
     </CardContent>
   </Card>
