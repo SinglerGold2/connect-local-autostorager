@@ -40,5 +40,6 @@
   "autostorager.page.sourceDown": "source is down",
   "autostorager.page.sourceError": "source error",
   "autostorager.page.logs": "Autostorager logs",
-  "autostorager.page.readManual": "Read Manual - Autostorager before you set this up. The folder path depends on whether PCL and the folder are on the same machine, on a server, or on another computer."
+  "autostorager.page.readManual": "Read Manual - Autostorager before you set this up. The folder path depends on whether PCL and the folder are on the same machine, on a server, or on another computer.",
+  "autostorager.page.maxFoldersHint": "Every folder is scanned on its own at the interval. A network share adds a request per scan, so many folders at a short interval mean more load on the NAS and the server."
 }

@@ -40,5 +40,6 @@
   "autostorager.page.sourceDown": "zdroj je nedostupný",
   "autostorager.page.sourceError": "chyba zdroje",
   "autostorager.page.logs": "Logy Autostorager",
-  "autostorager.page.readManual": "Před nastavením si přečtěte Manual - Autostorager. Cesta ke složce závisí na tom, zda PCL a složka běží na stejném počítači, na serveru nebo na jiném počítači."
+  "autostorager.page.readManual": "Před nastavením si přečtěte Manual - Autostorager. Cesta ke složce závisí na tom, zda PCL a složka běží na stejném počítači, na serveru nebo na jiném počítači.",
+  "autostorager.page.maxFoldersHint": "Každá složka se v intervalu prohledává samostatně. Síťové sdílení přidá jeden požadavek na každý scan; mnoho složek v krátkém intervalu znamená větší zátěž pro NAS a server."
 }

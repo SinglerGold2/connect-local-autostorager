@@ -45,6 +45,9 @@
                           "items": {
                             "type": "string"
                           }
+                        },
+                        "max_folders": {
+                          "type": "integer"
                         }
                       },
                       "required": [
@@ -52,7 +55,8 @@
                         "storage",
                         "max_mb",
                         "move_on_success",
-                        "folders"
+                        "folders",
+                        "max_folders"
                       ]
                     },
                     "recent": {
@@ -236,6 +240,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "max_folders": {
+            "type": "integer"
           }
         },
         "required": [
@@ -243,7 +250,8 @@
           "storage",
           "max_mb",
           "move_on_success",
-          "folders"
+          "folders",
+          "max_folders"
         ]
       }
     }

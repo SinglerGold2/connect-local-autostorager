@@ -14,8 +14,12 @@ import (
 	"strings"
 )
 
-// maxFolders is how many directories one instance may supervise.
-const maxFolders = 4
+// defaultMaxFolders is the minimum and the default; maxFoldersLimit keeps an
+// operator from turning the page into an unbounded scan grid.
+const (
+	defaultMaxFolders = 4
+	maxFoldersLimit   = 64
+)
 
 // merged reads the saved settings and lays them over what the host sent.
 func merged(ctx context.Context, base Settings) Settings {
@@ -38,6 +42,8 @@ func merged(ctx context.Context, base Settings) Settings {
 
 		base = apply(base, key, value)
 	}
+
+	base.Folders = normalized(base.Folders, base.MaxFolders)
 
 	return base
 }
@@ -113,7 +119,7 @@ func upsert(ctx context.Context, tx *sql.Tx, key, value string) error {
 }
 
 // normalized drops empty folders and keeps the list within the limit.
-func normalized(folders []string) []string {
+func normalized(folders []string, limit int) []string {
 	out := make([]string, 0, len(folders))
 
 	for _, folder := range folders {
@@ -125,8 +131,16 @@ func normalized(folders []string) []string {
 		out = append(out, trimmed)
 	}
 
-	if len(out) > maxFolders {
-		out = out[:maxFolders]
+	if limit < defaultMaxFolders {
+		limit = defaultMaxFolders
+	}
+
+	if limit > maxFoldersLimit {
+		limit = maxFoldersLimit
+	}
+
+	if len(out) > limit {
+		out = out[:limit]
 	}
 
 	return out
@@ -146,8 +160,8 @@ func validate(s Settings) error {
 		return fmt.Errorf("a storage name is required")
 	}
 
-	if len(normalized(s.Folders)) > maxFolders {
-		return fmt.Errorf("at most %d folders can be supervised", maxFolders)
+	if s.MaxFolders < defaultMaxFolders || s.MaxFolders > maxFoldersLimit {
+		return fmt.Errorf("max_folders must be between %d and %d", defaultMaxFolders, maxFoldersLimit)
 	}
 
 	return nil

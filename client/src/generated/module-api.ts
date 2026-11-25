@@ -59,6 +59,7 @@ export interface components {
             move_on_success: boolean;
             message?: string;
             folders: string[];
+            max_folders: number;
         };
     };
     responses: never;
@@ -93,6 +94,7 @@ export interface operations {
                             move_on_success: boolean;
                             message?: string;
                             folders: string[];
+                            max_folders: number;
                         };
                         recent: {
                             at: string;

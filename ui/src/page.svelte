@@ -18,8 +18,6 @@
   type Settings =
     operations['read-settings']['responses'][200]['content']['application/json'];
 
-  const maxFolders = 4;
-
   const host = heldHost();
   const routes = bind(host.client);
 
@@ -81,7 +79,8 @@
   }
 
   function addFolder() {
-    if (draft === undefined || draft.folders.length >= maxFolders) return;
+    if (draft === undefined || draft.folders.length >= draft.max_folders)
+      return;
 
     draft.folders = [...draft.folders, ''];
   }
@@ -176,19 +175,21 @@
               <Button
                 variant="secondary"
                 size="sm"
-                disabled={busy || draft.folders.length >= maxFolders}
+                disabled={busy || draft.folders.length >= draft.max_folders}
                 onclick={addFolder}
               >
                 {t('autostorager.page.addFolder')}
               </Button>
               <span class="text-neutral-500 text-xs"
-                >{draft.folders.length} / {maxFolders}</span
+                >{draft.folders.length} / {draft.max_folders}</span
               >
             </div>
             <p class="text-neutral-500 text-xs">
               {t('autostorager.page.folderHint')}
             </p>
-            <p class="text-neutral-500 text-xs"></p>
+            <p class="text-neutral-500 text-xs">
+              {t('autostorager.page.maxFoldersHint')}
+            </p>
           </div>
 
           <div class="flex flex-col gap-1">

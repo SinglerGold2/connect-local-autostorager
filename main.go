@@ -99,9 +99,13 @@ type Settings struct {
 	// Message is the line GET /autostorager answers with.
 	Message string `json:"message"`
 
-	// Folders are the directories this module watches, at most four. Empty
-	// switches watching off.
+	// Folders are the directories this module watches, at most MaxFolders.
+	// Empty switches watching off.
 	Folders []string `json:"folders"`
+
+	// MaxFolders is the operator's limit on the page's folder list. Four is
+	// the minimum and the default; the page cannot change it.
+	MaxFolders int `json:"max_folders"`
 
 	// IntervalSeconds is how often the folder is read.
 	IntervalSeconds int `json:"interval_seconds"`
@@ -161,7 +165,11 @@ func withDefaults(sent Settings) Settings {
 		sent.Message = defaultMessage
 	}
 
-	sent.Folders = normalized(sent.Folders)
+	if sent.MaxFolders < defaultMaxFolders || sent.MaxFolders > maxFoldersLimit {
+		sent.MaxFolders = defaultMaxFolders
+	}
+
+	sent.Folders = normalized(sent.Folders, sent.MaxFolders)
 
 	if sent.IntervalSeconds <= 0 {
 		sent.IntervalSeconds = defaultInterval
@@ -367,7 +375,7 @@ func routes() http.Handler {
 		}
 
 		if sent.Folders != nil {
-			current.Folders = normalized(*sent.Folders)
+			current.Folders = normalized(*sent.Folders, current.MaxFolders)
 		}
 
 		if sent.IntervalSeconds != nil {

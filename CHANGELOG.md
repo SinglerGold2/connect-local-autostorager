@@ -10,6 +10,9 @@
   down source instead of a red row every scan.
 - The settings page points to Manual - Autostorager before the fields, because
   the right folder path depends on the setup.
+- The folder limit is an operator setting (`max_folders`), default and minimum
+  four, up to 64. The page shows the configured limit and warns that every
+  network folder adds a request per scan.
 - "Last 25 imports" contains the newest 25 committed imports, and the
   dashboard card shows the newest 10. Both read the module's database, so they
   survive a restart instead of emptying with the session. Failed imports, move

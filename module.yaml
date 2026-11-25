@@ -80,6 +80,10 @@ options:
     type: int
     default: "5"
     summary: How often the folder is read, in seconds. A short interval means constant requests.
+  - key: max_folders
+    type: int
+    default: "4"
+    summary: "How many folders the page may supervise. Four is the minimum and the default; more is allowed. Each folder is scanned on its own at the interval, and a network share adds a request per scan, so many folders at a short interval mean more load on the NAS and the server."
   - key: storage
     type: string
     default: "local"

@@ -40,5 +40,6 @@
   "autostorager.page.sourceDown": "Quelle ist down",
   "autostorager.page.sourceError": "Quellenfehler",
   "autostorager.page.logs": "Autostorager-Logs",
-  "autostorager.page.readManual": "Lies vor dem Einrichten Manual - Autostorager. Der Ordnerpfad haengt davon ab, ob PCL und der Ordner auf demselben Rechner, auf einem Server oder auf einem anderen Computer liegen."
+  "autostorager.page.readManual": "Lies vor dem Einrichten Manual - Autostorager. Der Ordnerpfad haengt davon ab, ob PCL und der Ordner auf demselben Rechner, auf einem Server oder auf einem anderen Computer liegen.",
+  "autostorager.page.maxFoldersHint": "Jeder Ordner wird im Intervall einzeln gescannt. Eine Netzwerkfreigabe kostet pro Scan einen Request; viele Ordner in kurzem Intervall bedeuten mehr Last fuer NAS und Server."
 }
