@@ -20,7 +20,7 @@ import (
 )
 
 // recentLimit bounds the list the page and the card read.
-const recentLimit = 20
+const recentLimit = 25
 
 // sizeSettle is how many scans a file's size must hold before it is read.
 const sizeSettle = 2
@@ -310,11 +310,17 @@ func importOne(ctx context.Context, s Settings, folder string, root *os.Root, na
 		return
 	}
 
+	entry := Import{At: now(), Folder: folder, Source: path, Target: written.Path, Result: "imported"}
+
 	view.mu.Lock()
 	view.imports++
-	view.recent = append(view.recent, Import{At: now(), Folder: folder, Source: path, Target: written.Path, Result: "imported"})
+	view.recent = append(view.recent, entry)
 	view.recent = trim(view.recent)
 	view.mu.Unlock()
+
+	if err := recordImport(ctx, entry); err != nil {
+		fmt.Fprintf(os.Stderr, "%s: %v\n", name, err)
+	}
 
 	if s.MoveOnSuccess {
 		if _, moveErr := moveTo(root, name, filepath.Join("successful", name)); moveErr != nil {

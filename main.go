@@ -288,6 +288,14 @@ func methods() wirerpc.Methods {
 
 				db = opened
 				sent = merged(ctx, sent)
+
+				if history, err := loadImports(ctx); err == nil {
+					view.mu.Lock()
+					view.recent = trim(history)
+					view.mu.Unlock()
+				} else {
+					fmt.Fprintf(os.Stderr, "%s: load import history: %v\n", name, err)
+				}
 			}
 
 			held.Store(&sent)

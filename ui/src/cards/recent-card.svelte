@@ -34,7 +34,7 @@
     host.signal.addEventListener('abort', () => clearInterval(timer));
   });
 
-  const lines = $derived((answer?.recent ?? []).slice(-5).reverse());
+  const lines = $derived((answer?.recent ?? []).slice(-10).reverse());
   const downSources = $derived(
     (answer?.sources ?? []).filter(
       (source) => source.state === 'down' || source.state === 'error',
@@ -58,7 +58,7 @@
   <h3 class="text-base font-semibold">{heading}</h3>
 
   {#if downSources.length > 0}
-    <ul class="flex flex-col gap-1 text-sm">
+    <ul class="flex flex-col gap-1 overflow-y-auto text-sm">
       {#each downSources as source (source.folder)}
         <li class="flex items-center gap-2">
           <span
@@ -80,7 +80,7 @@
   {#if lines.length === 0 && downSources.length === 0}
     <p class="text-neutral-500 text-sm">{t('autostorager.card.empty')}</p>
   {:else}
-    <ul class="flex flex-col gap-1 text-sm">
+    <ul class="flex flex-col gap-1 overflow-y-auto text-sm">
       {#each lines as line (line.at + line.source)}
         <li class="flex items-center gap-2">
           <span

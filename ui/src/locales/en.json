@@ -12,7 +12,7 @@
   "autostorager.page.storage": "Storage",
   "autostorager.page.maxMb": "Biggest file",
   "autostorager.page.moveOnSuccess": "Move finished files into successful/",
-  "autostorager.page.recent": "Recent imports",
+  "autostorager.page.recent": "Last 25 imports",
   "autostorager.page.nothingYet": "Nothing imported yet.",
   "autostorager.page.none": "not set",
   "autostorager.page.yes": "move the source into successful/",

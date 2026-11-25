@@ -12,7 +12,7 @@
   "autostorager.page.storage": "Úložiště",
   "autostorager.page.maxMb": "Největší soubor",
   "autostorager.page.moveOnSuccess": "Přesunout hotové soubory do successful/",
-  "autostorager.page.recent": "Poslední importy",
+  "autostorager.page.recent": "Posledních 25 importů",
   "autostorager.page.nothingYet": "Zatím nic není importováno.",
   "autostorager.page.none": "nenastaveno",
   "autostorager.page.yes": "přesunout zdroj do successful/",
