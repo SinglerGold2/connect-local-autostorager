@@ -1,5 +1,5 @@
 {
-  "title": "Autostorager Handbuch",
+  "title": "Handbuch - Autostorager",
   "whatTitle": "Was dieses Modul tut",
   "what": "Es beobachtet einen Ordner und übergibt jede G-code- oder bgcode-Datei, die dort auftaucht, an den Storage des Servers. Dort wird sie wie ein manueller Upload behandelt: Der Server liest die Slicer-Daten, zeichnet die Vorschau und listet die Datei unter Storage. Das Modul schreibt nie direkt in den Storage, sondern geht denselben Weg wie ein Upload. Es werden nur reguläre Dateien genommen; ein symbolischer Link wird übersprungen.",
   "flowTitle": "Was mit einer Datei passiert",

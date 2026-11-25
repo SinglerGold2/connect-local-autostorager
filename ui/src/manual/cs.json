@@ -1,5 +1,5 @@
 {
-  "title": "Příručka Autostorager",
+  "title": "Příručka - Autostorager",
   "whatTitle": "Co tento modul dělá",
   "what": "Sleduje jednu složku a předává každý soubor G-code nebo bgcode, který se v ní objeví, do úložiště serveru. Soubor se tam zpracuje jako ruční nahrání: server načte údaje ze sliceru, vykreslí náhled a zařadí jej do Úložiště. Modul nikdy nezapisuje přímo do úložiště; používá stejné API jako nahrání. Berou se pouze běžné soubory; symbolický odkaz se přeskakuje.",
   "flowTitle": "Co se se souborem stane",

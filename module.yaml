@@ -133,7 +133,7 @@ ui:
         title: Autostorager
         icon: package
       - path: autostorager-manual
-        title: Autostorager manual
+        title: Manual - Autostorager
         icon: clipboard-list
     cards:
       - id: recent

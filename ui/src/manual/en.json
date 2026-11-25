@@ -1,5 +1,5 @@
 {
-  "title": "Autostorager manual",
+  "title": "Manual - Autostorager",
   "whatTitle": "What this module does",
   "what": "It watches one folder and hands every G-code or bgcode file that appears in it to the server's storage. There the file is treated like a manual upload: the server reads its slicer details, draws its preview and lists it under Storage. The module never writes into the storage directly; it goes through the same API an upload uses. Only regular files are taken; a symbolic link is skipped.",
   "flowTitle": "What happens to a file",
