@@ -264,7 +264,7 @@
                 <span
                   class="size-2 shrink-0 rounded-full"
                   class:bg-state-done-edge={source.state === 'online'}
-                  class:bg-amber-500={source.state === 'down'}
+                  class:bg-state-attention-edge={source.state === 'down'}
                   class:bg-state-fault={source.state === 'error'}
                   class:bg-neutral-400={source.state === 'starting'}
                   role="img"

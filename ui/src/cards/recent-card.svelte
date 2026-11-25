@@ -63,7 +63,7 @@
         <li class="flex items-center gap-2">
           <span
             class="size-2 shrink-0 rounded-full"
-            class:bg-amber-500={source.state === 'down'}
+            class:bg-state-attention-edge={source.state === 'down'}
             class:bg-state-fault={source.state === 'error'}
             role="img"
             aria-label={sourceLabel(source.state)}
