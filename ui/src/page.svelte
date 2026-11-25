@@ -131,7 +131,8 @@
         <p class="text-base">{t('autostorager.page.what')}</p>
         <p class="text-neutral-600 text-sm">{t('autostorager.page.delay')}</p>
         <p
-          class="rounded border-amber-500 bg-amber-500/10 border-l-4 p-2 text-sm"
+          class="rounded border-l-4 p-2 text-sm"
+          style="border-left-color: var(--state-attention-edge); background: color-mix(in srgb, var(--state-attention) 12%, transparent);"
         >
           {t('autostorager.page.readManual')}
         </p>
