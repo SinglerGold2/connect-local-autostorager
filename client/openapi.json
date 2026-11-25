@@ -62,9 +62,6 @@
                     "settings": {
                       "type": "object",
                       "properties": {
-                        "folder": {
-                          "type": "string"
-                        },
                         "interval_seconds": {
                           "type": "integer"
                         },
@@ -76,14 +73,23 @@
                         },
                         "move_on_success": {
                           "type": "boolean"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "folders": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
                         }
                       },
                       "required": [
-                        "folder",
                         "interval_seconds",
                         "storage",
                         "max_mb",
-                        "move_on_success"
+                        "move_on_success",
+                        "folders"
                       ]
                     },
                     "recent": {
@@ -119,13 +125,74 @@
                     },
                     "principal": {
                       "type": "string"
+                    },
+                    "sources": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "folder": {
+                            "type": "string"
+                          },
+                          "state": {
+                            "type": "string",
+                            "enum": [
+                              "starting",
+                              "online",
+                              "down",
+                              "error"
+                            ]
+                          },
+                          "detail": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "folder",
+                          "state",
+                          "at"
+                        ]
+                      }
+                    },
+                    "logs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "at": {
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "target": {
+                            "type": "string"
+                          },
+                          "result": {
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "at",
+                          "source",
+                          "result"
+                        ]
+                      }
                     }
                   },
                   "required": [
                     "message",
                     "language",
                     "settings",
-                    "recent"
+                    "recent",
+                    "sources",
+                    "logs"
                   ]
                 }
               }

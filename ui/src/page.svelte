@@ -30,6 +30,8 @@
 
   $effect(() => {
     void load();
+    const timer = setInterval(() => void load(), 10000);
+    host.signal.addEventListener('abort', () => clearInterval(timer));
   });
 
   async function load() {
@@ -91,7 +93,7 @@
     draft.folders = rest.length > 0 ? rest : [''];
   }
 
-  function setInterval(value: string) {
+  function setIntervalSeconds(value: string) {
     if (draft !== undefined) draft.interval_seconds = Number(value);
   }
 
@@ -105,6 +107,19 @@
 
   function setMove(value: boolean) {
     if (draft !== undefined) draft.move_on_success = value;
+  }
+
+  function sourceLabel(state: string) {
+    switch (state) {
+      case 'online':
+        return t('autostorager.page.sourceOnline');
+      case 'down':
+        return t('autostorager.page.sourceDown');
+      case 'starting':
+        return t('autostorager.page.sourceStarting');
+      default:
+        return t('autostorager.page.sourceError');
+    }
   }
 </script>
 
@@ -178,7 +193,7 @@
               class="w-32"
               oninput={(event: Event) => {
                 const target = event.currentTarget as HTMLInputElement | null;
-                if (target !== null) setInterval(target.value);
+                if (target !== null) setIntervalSeconds(target.value);
               }}
             />
             <p class="text-neutral-500 text-xs">
@@ -231,6 +246,40 @@
   {/if}
 
   {#if answer !== undefined}
+    {#if answer.sources.length > 0}
+      <Card>
+        <CardContent>
+          <h3 class="mb-2 font-medium">{t('autostorager.page.sources')}</h3>
+          <ul class="flex flex-col gap-1 text-sm">
+            {#each answer.sources as source (source.folder)}
+              <li
+                class="border-neutral-200 flex flex-wrap items-center gap-2 border-t pt-1"
+              >
+                <span
+                  class="size-2 shrink-0 rounded-full"
+                  class:bg-state-done-edge={source.state === 'online'}
+                  class:bg-amber-500={source.state === 'down'}
+                  class:bg-state-fault={source.state === 'error'}
+                  class:bg-neutral-400={source.state === 'starting'}
+                  role="img"
+                  aria-label={sourceLabel(source.state)}
+                ></span>
+                <span class="truncate">{source.folder}</span>
+                <span class="text-neutral-500 ml-auto"
+                  >{sourceLabel(source.state)}</span
+                >
+                {#if source.detail}
+                  <span class="text-neutral-500 w-full text-xs"
+                    >{source.detail}</span
+                  >
+                {/if}
+              </li>
+            {/each}
+          </ul>
+        </CardContent>
+      </Card>
+    {/if}
+
     <Card>
       <CardContent>
         <h3 class="mb-2 font-medium">{t('autostorager.page.recent')}</h3>
@@ -256,5 +305,27 @@
         {/if}
       </CardContent>
     </Card>
+
+    {#if answer.logs.length > 0}
+      <Card>
+        <CardContent>
+          <h3 class="mb-2 font-medium">{t('autostorager.page.logs')}</h3>
+          <ul class="flex flex-col gap-1 text-sm">
+            {#each answer.logs as entry (entry.at + entry.source + (entry.detail ?? ''))}
+              <li
+                class="border-neutral-200 flex flex-wrap items-center gap-2 border-t pt-1"
+              >
+                <span class="text-neutral-500">{entry.at}</span>
+                <span class="truncate">{entry.source}</span>
+                <span class="ml-auto">{entry.result}</span>
+                {#if entry.detail}<span class="text-neutral-500"
+                    >{entry.detail}</span
+                  >{/if}
+              </li>
+            {/each}
+          </ul>
+        </CardContent>
+      </Card>
+    {/if}
   {/if}
 </div>

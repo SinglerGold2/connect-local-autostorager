@@ -4,6 +4,12 @@
 
 ### Fixed
 
+- A source that is unreachable is a status, not a failed import. The page
+  shows "source is down" with the reason, updates it in place and keeps it out
+  of the recent-import list. The dashboard card shows one status line per
+  down source instead of a red row every scan.
+- "Recent imports" contains only committed imports now. Failed imports, move
+  warnings and other errors are in the separate "Autostorager logs" card.
 - The source move into `successful/` or `failed/` chooses a free name when
   the destination exists: `test.gcode` becomes `test-1.gcode`, and the
   existing file stays.

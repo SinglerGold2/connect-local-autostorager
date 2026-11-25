@@ -33,5 +33,11 @@
   "autostorager.page.remove": "Entfernen",
   "autostorager.page.langEn": "EN",
   "autostorager.page.langDe": "DE",
-  "autostorager.page.folderPlaceholder": "/home/du/autostorager"
+  "autostorager.page.folderPlaceholder": "/home/du/autostorager",
+  "autostorager.page.sources": "Quellen",
+  "autostorager.page.sourceStarting": "wird geprüft",
+  "autostorager.page.sourceOnline": "online",
+  "autostorager.page.sourceDown": "Quelle ist down",
+  "autostorager.page.sourceError": "Quellenfehler",
+  "autostorager.page.logs": "Autostorager-Logs"
 }

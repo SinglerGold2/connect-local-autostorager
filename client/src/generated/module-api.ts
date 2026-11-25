@@ -87,11 +87,12 @@ export interface operations {
                     "application/json": {
                         message: string;
                         settings: {
-                            folder: string;
                             interval_seconds: number;
                             storage: string;
                             max_mb: number;
                             move_on_success: boolean;
+                            message?: string;
+                            folders: string[];
                         };
                         recent: {
                             at: string;
@@ -102,6 +103,20 @@ export interface operations {
                         }[];
                         language: string;
                         principal?: string;
+                        sources: {
+                            folder: string;
+                            /** @enum {string} */
+                            state: "starting" | "online" | "down" | "error";
+                            detail?: string;
+                            at: string;
+                        }[];
+                        logs: {
+                            at: string;
+                            source: string;
+                            target?: string;
+                            result: string;
+                            detail?: string;
+                        }[];
                     };
                 };
             };

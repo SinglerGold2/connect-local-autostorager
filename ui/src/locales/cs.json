@@ -33,5 +33,11 @@
   "autostorager.page.remove": "Odebrat",
   "autostorager.page.langEn": "EN",
   "autostorager.page.langDe": "DE",
-  "autostorager.page.folderPlaceholder": "/home/vy/autostorager"
+  "autostorager.page.folderPlaceholder": "/home/vy/autostorager",
+  "autostorager.page.sources": "Zdroje",
+  "autostorager.page.sourceStarting": "kontrola",
+  "autostorager.page.sourceOnline": "online",
+  "autostorager.page.sourceDown": "zdroj je nedostupný",
+  "autostorager.page.sourceError": "chyba zdroje",
+  "autostorager.page.logs": "Logy Autostorager"
 }

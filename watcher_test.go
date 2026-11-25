@@ -270,3 +270,75 @@ func TestMoveToRenamesExistingDestination(t *testing.T) {
 		t.Fatalf("renamed source is wrong: %q, %v", fresh, err)
 	}
 }
+
+// TestScanMarksMissingSourceDown keeps an unreachable source out of the
+// recent-import list and reports it as a status instead.
+func TestScanMarksMissingSourceDown(t *testing.T) {
+	view = &shared{}
+
+	missing := filepath.Join(t.TempDir(), "missing")
+	scan(context.Background(), Settings{}, missing, map[string]int64{}, map[string]int{})
+
+	if got := recentImports(); len(got) != 0 {
+		t.Fatalf("a missing source wrote %d recent imports", len(got))
+	}
+
+	if got := logEntries(); len(got) != 0 {
+		t.Fatalf("a missing source wrote %d logs", len(got))
+	}
+
+	statuses := sourceStatuses()
+	if len(statuses) != 1 {
+		t.Fatalf("sourceStatuses() = %d entries, want 1", len(statuses))
+	}
+
+	if statuses[0].State != "down" {
+		t.Fatalf("missing source state = %q, want down", statuses[0].State)
+	}
+
+	if statuses[0].Detail == "" {
+		t.Fatal("missing source has no detail")
+	}
+}
+
+func TestScanMarksSourceOnline(t *testing.T) {
+	view = &shared{}
+
+	dir := t.TempDir()
+	scan(context.Background(), Settings{}, dir, map[string]int64{}, map[string]int{})
+
+	statuses := sourceStatuses()
+	if len(statuses) != 1 || statuses[0].State != "online" {
+		t.Fatalf("sourceStatuses() = %+v, want one online source", statuses)
+	}
+}
+
+func TestNoteSplitsRecentAndLogs(t *testing.T) {
+	view = &shared{}
+
+	note(Import{At: "2026-11-25T04:00:00Z", Source: "a.gcode", Result: "imported"})
+	note(Import{At: "2026-11-25T04:01:00Z", Source: "b.gcode", Result: "failed"})
+	noteLog(Import{At: "2026-11-25T04:02:00Z", Source: "c.gcode", Result: "imported", Detail: "could not move the source"})
+
+	if got := recentImports(); len(got) != 1 || got[0].Source != "a.gcode" {
+		t.Fatalf("recentImports() = %+v, want only the imported entry", got)
+	}
+
+	if got := logEntries(); len(got) != 2 {
+		t.Fatalf("logEntries() = %d entries, want 2", len(got))
+	}
+}
+
+func TestSourceUnavailable(t *testing.T) {
+	if !sourceUnavailable(os.ErrNotExist) {
+		t.Fatal("os.ErrNotExist should be a down source")
+	}
+
+	if !sourceUnavailable(errors.New("readdir /app/config/autostorager-g: host is down")) {
+		t.Fatal("host is down should be a down source")
+	}
+
+	if sourceUnavailable(errors.New("readdir /app/config/autostorager-g: permission denied")) {
+		t.Fatal("permission denied should not be a down source")
+	}
+}

@@ -400,6 +400,8 @@ func routes() http.Handler {
 			"language": languageTag(),
 			"settings": settings(),
 			"recent":   recentImports(),
+			"sources":  sourceStatuses(),
+			"logs":     logEntries(),
 			// Who the host says is calling. It is the host's answer and not a
 			// header this process trusted.
 			"principal": routesapi.PrincipalOf(r),

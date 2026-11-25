@@ -35,6 +35,17 @@
   });
 
   const lines = $derived((answer?.recent ?? []).slice(-5).reverse());
+  const downSources = $derived(
+    (answer?.sources ?? []).filter(
+      (source) => source.state === 'down' || source.state === 'error',
+    ),
+  );
+
+  function sourceLabel(state: string) {
+    return state === 'down'
+      ? t('autostorager.page.sourceDown')
+      : t('autostorager.page.sourceError');
+  }
 
   function nameOf(source: string): string {
     const parts = source.split(/[\\/]/);
@@ -46,20 +57,36 @@
 <div class="flex h-full flex-col gap-2">
   <h3 class="text-base font-semibold">{heading}</h3>
 
-  {#if lines.length === 0}
+  {#if downSources.length > 0}
+    <ul class="flex flex-col gap-1 text-sm">
+      {#each downSources as source (source.folder)}
+        <li class="flex items-center gap-2">
+          <span
+            class="size-2 shrink-0 rounded-full"
+            class:bg-amber-500={source.state === 'down'}
+            class:bg-state-fault={source.state === 'error'}
+            role="img"
+            aria-label={sourceLabel(source.state)}
+          ></span>
+          <span class="truncate">{nameOf(source.folder)}</span>
+          <span class="text-neutral-500 ml-auto shrink-0"
+            >{sourceLabel(source.state)}</span
+          >
+        </li>
+      {/each}
+    </ul>
+  {/if}
+
+  {#if lines.length === 0 && downSources.length === 0}
     <p class="text-neutral-500 text-sm">{t('autostorager.card.empty')}</p>
   {:else}
     <ul class="flex flex-col gap-1 text-sm">
       {#each lines as line (line.at + line.source)}
         <li class="flex items-center gap-2">
           <span
-            class="size-2 shrink-0 rounded-full"
-            class:bg-state-done-edge={line.result === 'imported'}
-            class:bg-state-fault-edge={line.result !== 'imported'}
+            class="size-2 shrink-0 rounded-full bg-state-done-edge"
             role="img"
-            aria-label={line.result === 'imported'
-              ? t('autostorager.card.imported')
-              : t('autostorager.card.failed')}
+            aria-label={t('autostorager.card.imported')}
           ></span>
           <span class="truncate">{nameOf(line.source)}</span>
           <span class="text-neutral-500 ml-auto shrink-0"

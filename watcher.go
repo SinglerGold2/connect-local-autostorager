@@ -11,6 +11,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -41,10 +42,22 @@ type Import struct {
 	Detail string `json:"detail,omitempty"`
 }
 
+// SourceStatus is the current state of one watched folder. A client that is
+// off is "down", not a failed import: the page keeps this separate from the
+// recent list, so a sleeping PC does not fill the list with errors.
+type SourceStatus struct {
+	Folder string `json:"folder"`
+	State  string `json:"state"`
+	Detail string `json:"detail,omitempty"`
+	At     string `json:"at"`
+}
+
 // shared is what every watcher and the page read together.
 type shared struct {
 	mu      sync.Mutex
 	recent  []Import
+	logs    []Import
+	sources map[string]SourceStatus
 	scans   int64
 	imports int64
 	failed  int64
@@ -101,8 +114,22 @@ func startWatcher(s Settings) {
 
 	watching = nil
 
+	view.mu.Lock()
+	view.sources = make(map[string]SourceStatus)
+
 	for _, folder := range s.Folders {
-		if strings.TrimSpace(folder) == "" {
+		folder = strings.TrimSpace(folder)
+		if folder == "" {
+			continue
+		}
+
+		view.sources[folder] = SourceStatus{Folder: folder, State: "starting", At: now()}
+	}
+	view.mu.Unlock()
+
+	for _, folder := range s.Folders {
+		folder = strings.TrimSpace(folder)
+		if folder == "" {
 			continue
 		}
 
@@ -139,7 +166,7 @@ func loop(ctx context.Context, s Settings, folder string) {
 func scan(ctx context.Context, s Settings, folder string, sizes map[string]int64, stable map[string]int) {
 	root, err := os.OpenRoot(folder)
 	if err != nil {
-		note(Import{At: now(), Folder: folder, Source: folder, Result: "error", Detail: err.Error()})
+		sourceDown(folder, err)
 
 		return
 	}
@@ -147,7 +174,7 @@ func scan(ctx context.Context, s Settings, folder string, sizes map[string]int64
 
 	dir, err := root.Open(".")
 	if err != nil {
-		note(Import{At: now(), Folder: folder, Source: folder, Result: "error", Detail: err.Error()})
+		sourceDown(folder, err)
 
 		return
 	}
@@ -156,10 +183,12 @@ func scan(ctx context.Context, s Settings, folder string, sizes map[string]int64
 	_ = dir.Close()
 
 	if err != nil {
-		note(Import{At: now(), Folder: folder, Source: folder, Result: "error", Detail: err.Error()})
+		sourceDown(folder, err)
 
 		return
 	}
+
+	sourceOnline(folder)
 
 	view.mu.Lock()
 	view.scans++
@@ -289,7 +318,7 @@ func importOne(ctx context.Context, s Settings, folder string, root *os.Root, na
 
 	if s.MoveOnSuccess {
 		if _, moveErr := moveTo(root, name, filepath.Join("successful", name)); moveErr != nil {
-			note(Import{At: now(), Folder: folder, Source: path, Target: written.Path, Result: "imported", Detail: "could not move the source: " + moveErr.Error()})
+			noteLog(Import{At: now(), Folder: folder, Source: path, Target: written.Path, Result: "imported", Detail: "could not move the source: " + moveErr.Error()})
 		}
 	}
 }
@@ -453,13 +482,105 @@ func copyTo(root *os.Root, from, to string) error {
 	return root.Remove(from)
 }
 
-// note keeps one line for the page.
+// sourceDown records why a folder could not be read. A host that is down is a
+// status, not an import error; a permission or other configuration failure is
+// kept as an error but still stays out of the recent-import list.
+func sourceDown(folder string, err error) {
+	state := "error"
+	if sourceUnavailable(err) {
+		state = "down"
+	}
+
+	setSource(folder, state, err.Error())
+}
+
+// sourceUnavailable reports whether err means the source is unreachable: the
+// client is off, the share is gone or the mount is stale. A permission error
+// is deliberately not in this list.
+func sourceUnavailable(err error) bool {
+	if errors.Is(err, os.ErrNotExist) {
+		return true
+	}
+
+	text := strings.ToLower(err.Error())
+	for _, fragment := range []string{
+		"host is down",
+		"host is unreachable",
+		"network is unreachable",
+		"network is down",
+		"connection refused",
+		"connection timed out",
+		"no route to host",
+		"transport endpoint is not connected",
+		"stale file handle",
+		"input/output error",
+		"not mounted",
+		"operation timed out",
+	} {
+		if strings.Contains(text, fragment) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func sourceOnline(folder string) {
+	setSource(folder, "online", "")
+}
+
+func setSource(folder, state, detail string) {
+	view.mu.Lock()
+	defer view.mu.Unlock()
+
+	if view.sources == nil {
+		view.sources = make(map[string]SourceStatus)
+	}
+
+	view.sources[folder] = SourceStatus{Folder: folder, State: state, Detail: detail, At: now()}
+}
+
+// sourceStatuses is the current state of every watched folder, sorted so the
+// page does not reshuffle the rows on every poll.
+func sourceStatuses() []SourceStatus {
+	view.mu.Lock()
+	defer view.mu.Unlock()
+
+	out := make([]SourceStatus, 0, len(view.sources))
+	for _, source := range view.sources {
+		out = append(out, source)
+	}
+
+	sort.Slice(out, func(i, j int) bool {
+		return out[i].Folder < out[j].Folder
+	})
+
+	return out
+}
+
+// note keeps one line for the page: a successful import in "Recent imports",
+// everything else in the logs.
 func note(entry Import) {
 	view.mu.Lock()
 	defer view.mu.Unlock()
 
-	view.recent = append(view.recent, entry)
-	view.recent = trim(view.recent)
+	if entry.Result == "imported" {
+		view.recent = append(view.recent, entry)
+		view.recent = trim(view.recent)
+	} else {
+		view.logs = append(view.logs, entry)
+		view.logs = trim(view.logs)
+	}
+}
+
+// noteLog keeps a warning that belongs to a committed import out of the
+// imports list and in the logs.
+func noteLog(entry Import) {
+	view.mu.Lock()
+	defer view.mu.Unlock()
+
+	view.logs = append(view.logs, entry)
+	view.logs = trim(view.logs)
 }
 
 // trim keeps the newest lines.
@@ -478,6 +599,17 @@ func recentImports() []Import {
 
 	out := make([]Import, len(view.recent))
 	copy(out, view.recent)
+
+	return out
+}
+
+// logEntries is the separate list for failed imports and warnings.
+func logEntries() []Import {
+	view.mu.Lock()
+	defer view.mu.Unlock()
+
+	out := make([]Import, len(view.logs))
+	copy(out, view.logs)
 
 	return out
 }
